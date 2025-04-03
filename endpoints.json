@@ -1,0 +1,95 @@
+{
+    "GET /api": {
+      "description": "Serves up a json representation of all the available endpoints of the API"
+    },
+    "GET /api/garage-chains": {
+      "description": "Retrieves all garage chains"
+    },
+    "GET /api/garage-chains/:id": {
+      "description": "Retrieves a single garage chain by its id"
+    },
+    "POST /api/garage-chains": {
+      "description": "Creates a new garage chain"
+    },
+    "PATCH /api/garage-chains/:id": {
+      "description": "Updates an existing garage chain"
+    },
+    "DELETE /api/garage-chains/:id": {
+      "description": "Deletes an existing garage chain"
+    },
+    "GET /api/branches": {
+      "description": "Retrieves all branches"
+    },
+    "GET /api/branches/:id": {
+      "description": "Retrieves a single branch by its id"
+    },
+    "POST /api/branches": {
+      "description": "Creates a new branch"
+    },
+    "PATCH /api/branches/:id": {
+      "description": "Updates an existing branch"
+    },
+    "DELETE /api/branches/:id": {
+      "description": "Deletes an existing branch"
+    },
+    "GET /api/users": {
+      "description": "Retrieves all users"
+    },
+    "GET /api/users/:id": {
+      "description": "Retrieves a single user by its id"
+    },
+    "POST /api/users": {
+      "description": "Creates a new user"
+    },
+    "PATCH /api/users/:id": {
+      "description": "Updates an existing user"
+    },
+    "DELETE /api/users/:id": {
+      "description": "Deletes an existing user"
+    },
+    "GET /api/operating-hours": {
+      "description": "Retrieves all operating hours"
+    },
+    "GET /api/operating-hours/:id": {
+      "description": "Retrieves a single operating hour record by its id"
+    },
+    "POST /api/operating-hours": {
+      "description": "Creates a new operating hour record"
+    },
+    "PATCH /api/operating-hours/:id": {
+      "description": "Updates an existing operating hour record"
+    },
+    "DELETE /api/operating-hours/:id": {
+      "description": "Deletes an existing operating hour record"
+    },
+    "GET /api/booking-types": {
+      "description": "Retrieves all booking types"
+    },
+    "GET /api/booking-types/:id": {
+      "description": "Retrieves a single booking type by its id"
+    },
+    "POST /api/booking-types": {
+      "description": "Creates a new booking type"
+    },
+    "PATCH /api/booking-types/:id": {
+      "description": "Updates an existing booking type"
+    },
+    "DELETE /api/booking-types/:id": {
+      "description": "Deletes an existing booking type"
+    },
+    "GET /api/bookings": {
+      "description": "Retrieves all bookings"
+    },
+    "GET /api/bookings/:id": {
+      "description": "Retrieves a single booking by its id"
+    },
+    "POST /api/bookings": {
+      "description": "Creates a new booking"
+    },
+    "PATCH /api/bookings/:id": {
+      "description": "Updates an existing booking"
+    },
+    "DELETE /api/bookings/:id": {
+      "description": "Deletes an existing booking"
+    }
+  }

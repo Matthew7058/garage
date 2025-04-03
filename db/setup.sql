@@ -1,0 +1,5 @@
+DROP DATABASE IF EXISTS garage_test;
+DROP DATABASE IF EXISTS garage;
+
+CREATE DATABASE garage_test;
+CREATE DATABASE garage;
