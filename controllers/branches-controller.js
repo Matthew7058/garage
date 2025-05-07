@@ -4,6 +4,7 @@ const {
     insertBranch,
     updateBranch,
     removeBranch,
+    fetchBranchesByChainId,
   } = require('../models/branches-model');
   
   exports.getBranches = (req, res, next) => {
@@ -16,6 +17,13 @@ const {
     const { id } = req.params;
     fetchBranchById(id)
       .then((branch) => res.status(200).send({ branch }))
+      .catch(next);
+  };
+
+  exports.getBranchesByChain = (req, res, next) => {
+    const { chain_id } = req.params;
+    fetchBranchesByChainId(chain_id)
+      .then((branches) => res.status(200).send({ branches }))
       .catch(next);
   };
   

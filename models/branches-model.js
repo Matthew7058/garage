@@ -14,6 +14,12 @@ exports.fetchBranchById = (id) => {
     });
 };
 
+exports.fetchBranchesByChainId = (garage_id) => {
+  return db
+    .query('SELECT * FROM branches WHERE garage_id = $1;', [garage_id])
+    .then((result) => result.rows);
+};
+
 exports.insertBranch = ({ garage_id, branch_name, address, phone, email }) => {
   return db
     .query(

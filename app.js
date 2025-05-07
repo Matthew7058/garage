@@ -26,6 +26,7 @@ app.delete('/api/garage-chains/:id', garageChainsController.deleteGarageChain);
 // Branches endpoints
 app.get('/api/branches', branchesController.getBranches);
 app.get('/api/branches/:id', branchesController.getBranchById);
+app.get('/api/garage-chains/:chain_id/branches', branchesController.getBranchesByChain);
 app.post('/api/branches', branchesController.postBranch);
 app.patch('/api/branches/:id', branchesController.patchBranch);
 app.delete('/api/branches/:id', branchesController.deleteBranch);

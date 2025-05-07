@@ -23,6 +23,9 @@
     "GET /api/branches/:id": {
       "description": "Retrieves a single branch by its id"
     },
+    "GET /api/garage-chains/:chain_id/branches": {
+      "description": "Retrieves all branches in a garage chain"
+    },
     "POST /api/branches": {
       "description": "Creates a new branch"
     },

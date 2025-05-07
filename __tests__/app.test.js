@@ -116,6 +116,33 @@ describe("Garage Chains Endpoints", () => {
           });
       });
     });
+
+    describe("GET /api/garage-chains/:chain_id/branches", () => {
+      test("200: Responds with all branches for a given chain", () => {
+        return request(app)
+          .get("/api/garage-chains/1/branches")
+          .expect(200)
+          .then(({ body: { branches } }) => {
+            // cheeky check: every branch should belong to chain 1
+            expect(Array.isArray(branches)).toBe(true);
+            expect(branches.length).toBeGreaterThan(0);
+            branches.forEach((b) => {
+              expect(b).toHaveProperty("garage_id", 1);
+            });
+          });
+      });
+
+      test("200: Returns an empty array if chain exists but has no branches", () => {
+        // assuming chain 999 exists in test seed but has no branches
+        return request(app)
+          .get("/api/garage-chains/999/branches")
+          .expect(200)
+          .then(({ body: { branches } }) => {
+            expect(Array.isArray(branches)).toBe(true);
+            expect(branches).toHaveLength(0);
+          });
+      });
+    });
   });
   
   // --------------------
