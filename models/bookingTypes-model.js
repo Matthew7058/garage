@@ -51,3 +51,9 @@ exports.removeBookingType = (id) => {
       return result.rows[0];
     });
 };
+
+exports.fetchBookingTypesByBranchId = (branch_id) => {
+  return db
+    .query('SELECT * FROM booking_types WHERE branch_id = $1;', [branch_id])
+    .then((result) => result.rows);
+};

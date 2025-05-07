@@ -61,3 +61,4 @@ exports.removeBranch = (id) => {
       return result.rows[0];
     });
 };
+

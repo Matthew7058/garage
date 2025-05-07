@@ -131,8 +131,8 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       // Insert data into booking_types
       .then(() => {
         const insertBookingTypesQuery = format(
-          `INSERT INTO booking_types (name, price) VALUES %L RETURNING *;`,
-          bookingTypesData.map(({ name, price }) => [name, price])
+          `INSERT INTO booking_types (branch_id, name, price) VALUES %L RETURNING *;`,
+          bookingTypesData.map(({ branch_id, name, price }) => [branch_id, name, price])
         );
         return db.query(insertBookingTypesQuery);
       })

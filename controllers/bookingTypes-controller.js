@@ -4,6 +4,7 @@ const {
     insertBookingType,
     updateBookingType,
     removeBookingType,
+    fetchBookingTypesByBranchId,
   } = require('../models/bookingTypes-model');
   
   exports.getBookingTypes = (req, res, next) => {
@@ -38,5 +39,12 @@ const {
     const { id } = req.params;
     removeBookingType(id)
       .then((deletedType) => res.status(200).send({ booking_type: deletedType }))
+      .catch(next);
+  };
+
+  exports.getBookingTypesByBranch = (req, res, next) => {
+    const { branch_id } = req.params;
+    fetchBookingTypesByBranchId(branch_id)
+      .then((booking_types) => res.status(200).send({ booking_types }))
       .catch(next);
   };

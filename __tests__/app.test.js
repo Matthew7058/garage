@@ -457,6 +457,34 @@ describe("Garage Chains Endpoints", () => {
           });
       });
     });
+
+    // 1. Operating hours by branch
+    describe("GET /api/branchees/:branch_id/operating-hours", () => {
+      test("200: returns operating hours for branch 1", () => {
+        return request(app)
+          .get("/api/operating-hours/branch/1")
+          .expect(200)
+          .then(({ body: { operating_hours } }) => {
+            expect(Array.isArray(operating_hours)).toBe(true);
+            expect(operating_hours.length).toBeGreaterThan(0);
+            operating_hours.forEach((oh) => {
+              expect(oh).toHaveProperty("branch_id", 1);
+              expect(oh).toHaveProperty("open_time");
+              expect(oh).toHaveProperty("close_time");
+            });
+          });
+      });
+
+      test("200: returns empty array for a branch with no hours (e.g. 999)", () => {
+        return request(app)
+          .get("/api/operating-hours/branch/999")
+          .expect(200)
+          .then(({ body: { operating_hours } }) => {
+            expect(Array.isArray(operating_hours)).toBe(true);
+            expect(operating_hours).toHaveLength(0);
+          });
+      });
+    });
   });
   
   // --------------------
@@ -548,6 +576,34 @@ describe("Garage Chains Endpoints", () => {
           .expect(404)
           .then(({ body: { msg } }) => {
             expect(msg).toBe("Booking type not found");
+          });
+      });
+    });
+
+    // 2. Booking types by branch
+    describe("GET /api/booking-types/branch/:branch_id", () => {
+      test("200: returns booking types for branch 1", () => {
+        return request(app)
+          .get("/api/booking-types/branch/1")
+          .expect(200)
+          .then(({ body: { booking_types } }) => {
+            expect(Array.isArray(booking_types)).toBe(true);
+            expect(booking_types.length).toBeGreaterThan(0);
+            booking_types.forEach((bt) => {
+              expect(bt).toHaveProperty("branch_id", 1);
+              expect(bt).toHaveProperty("name");
+              expect(bt).toHaveProperty("price");
+            });
+          });
+      });
+
+      test("200: empty array when branch has no types (e.g. 999)", () => {
+        return request(app)
+          .get("/api/booking-types/branch/999")
+          .expect(200)
+          .then(({ body: { booking_types } }) => {
+            expect(Array.isArray(booking_types)).toBe(true);
+            expect(booking_types).toHaveLength(0);
           });
       });
     });
@@ -647,6 +703,61 @@ describe("Garage Chains Endpoints", () => {
           .expect(404)
           .then(({ body: { msg } }) => {
             expect(msg).toBe("Booking not found");
+          });
+      });
+    });
+
+    // 3. All bookings at a branch
+    describe("GET /api/bookings/branch/:branch_id", () => {
+      test("200: returns all bookings for branch 1", () => {
+        return request(app)
+          .get("/api/bookings/branch/1")
+          .expect(200)
+          .then(({ body: { bookings } }) => {
+            expect(Array.isArray(bookings)).toBe(true);
+            expect(bookings.length).toBeGreaterThan(0);
+            bookings.forEach((b) => {
+              expect(b).toHaveProperty("branch_id", 1);
+              expect(b).toHaveProperty("booking_date");
+              expect(b).toHaveProperty("booking_time");
+            });
+          });
+      });
+
+      test("200: empty array for branch with no bookings (e.g. 999)", () => {
+        return request(app)
+          .get("/api/bookings/branch/999")
+          .expect(200)
+          .then(({ body: { bookings } }) => {
+            expect(Array.isArray(bookings)).toBe(true);
+            expect(bookings).toHaveLength(0);
+          });
+      });
+    });
+
+    // 4. Bookings at a branch on a specific date
+    describe("GET /api/bookings/branch/:branch_id/date/:date", () => {
+      test("200: returns only branch 1's bookings on 2025-05-01", () => {
+        return request(app)
+          .get("/api/bookings/branch/1/date/2025-05-01")
+          .expect(200)
+          .then(({ body: { bookings } }) => {
+            expect(Array.isArray(bookings)).toBe(true);
+            expect(bookings.length).toBeGreaterThan(0);
+            bookings.forEach((b) => {
+              expect(b).toHaveProperty("branch_id", 1);
+              expect(b).toHaveProperty("booking_date", "2025-05-01");
+            });
+          });
+      });
+
+      test("200: returns empty array when no bookings on that date", () => {
+        return request(app)
+          .get("/api/bookings/branch/1/date/2099-01-01")
+          .expect(200)
+          .then(({ body: { bookings } }) => {
+            expect(Array.isArray(bookings)).toBe(true);
+            expect(bookings).toHaveLength(0);
           });
       });
     });

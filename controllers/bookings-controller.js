@@ -4,7 +4,16 @@ const {
     insertBooking,
     updateBooking,
     removeBooking,
+    fetchBookingsByBranchId,
+    fetchBookingsByBranchAndDate
   } = require('../models/bookings-model');
+
+  function formatLocalDate(dateObj) {
+    const year  = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day   = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
   
   exports.getBookings = (req, res, next) => {
     fetchAllBookings()
@@ -39,4 +48,24 @@ const {
     removeBooking(id)
       .then((deletedBooking) => res.status(200).send({ booking: deletedBooking }))
       .catch(next);
+  };
+
+  exports.getBookingsByBranch = (req, res, next) => {
+    const { branch_id } = req.params;
+    fetchBookingsByBranchId(branch_id)
+      .then((bookings) => res.status(200).send({ bookings }))
+      .catch(next);
+  };
+  
+  exports.getBookingsByBranchAndDate = (req, res, next) => {
+    const { branch_id, date } = req.params;
+    fetchBookingsByBranchAndDate(branch_id, date)
+    .then((bookings) => {
+      const formatted = bookings.map((b) => ({
+        ...b,
+        booking_date: formatLocalDate(b.booking_date),
+      }));
+      res.status(200).send({ bookings: formatted });
+    })
+    .catch(next);
   };

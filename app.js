@@ -22,11 +22,11 @@ app.get('/api/garage-chains/:id', garageChainsController.getGarageChainById);
 app.post('/api/garage-chains', garageChainsController.postGarageChain);
 app.patch('/api/garage-chains/:id', garageChainsController.patchGarageChain);
 app.delete('/api/garage-chains/:id', garageChainsController.deleteGarageChain);
+app.get('/api/garage-chains/:chain_id/branches', branchesController.getBranchesByChain);
 
 // Branches endpoints
 app.get('/api/branches', branchesController.getBranches);
 app.get('/api/branches/:id', branchesController.getBranchById);
-app.get('/api/garage-chains/:chain_id/branches', branchesController.getBranchesByChain);
 app.post('/api/branches', branchesController.postBranch);
 app.patch('/api/branches/:id', branchesController.patchBranch);
 app.delete('/api/branches/:id', branchesController.deleteBranch);
@@ -41,6 +41,7 @@ app.delete('/api/users/:id', usersController.deleteUser);
 // Operating Hours endpoints
 app.get('/api/operating-hours', operatingHoursController.getOperatingHours);
 app.get('/api/operating-hours/:id', operatingHoursController.getOperatingHourById);
+app.get('/api/operating-hours/branch/:branch_id', operatingHoursController.getOperatingHoursByBranch);
 app.post('/api/operating-hours', operatingHoursController.postOperatingHour);
 app.patch('/api/operating-hours/:id', operatingHoursController.patchOperatingHour);
 app.delete('/api/operating-hours/:id', operatingHoursController.deleteOperatingHour);
@@ -48,6 +49,7 @@ app.delete('/api/operating-hours/:id', operatingHoursController.deleteOperatingH
 // Booking Types endpoints
 app.get('/api/booking-types', bookingTypesController.getBookingTypes);
 app.get('/api/booking-types/:id', bookingTypesController.getBookingTypeById);
+app.get('/api/booking-types/branch/:branch_id', bookingTypesController.getBookingTypesByBranch);
 app.post('/api/booking-types', bookingTypesController.postBookingType);
 app.patch('/api/booking-types/:id', bookingTypesController.patchBookingType);
 app.delete('/api/booking-types/:id', bookingTypesController.deleteBookingType);
@@ -55,6 +57,8 @@ app.delete('/api/booking-types/:id', bookingTypesController.deleteBookingType);
 // Bookings endpoints
 app.get('/api/bookings', bookingsController.getBookings);
 app.get('/api/bookings/:id', bookingsController.getBookingById);
+app.get('/api/bookings/branch/:branch_id', bookingsController.getBookingsByBranch);
+app.get('/api/bookings/branch/:branch_id/date/:date', bookingsController.getBookingsByBranchAndDate);
 app.post('/api/bookings', bookingsController.postBooking);
 app.patch('/api/bookings/:id', bookingsController.patchBooking);
 app.delete('/api/bookings/:id', bookingsController.deleteBooking);

@@ -4,6 +4,7 @@ const {
     insertOperatingHour,
     updateOperatingHour,
     removeOperatingHour,
+    fetchOperatingHoursByBranchId,
   } = require('../models/operatingHours-model');
   
   exports.getOperatingHours = (req, res, next) => {
@@ -38,5 +39,12 @@ const {
     const { id } = req.params;
     removeOperatingHour(id)
       .then((deletedHour) => res.status(200).send({ operating_hour: deletedHour }))
+      .catch(next);
+  };
+
+  exports.getOperatingHoursByBranch = (req, res, next) => {
+    const { branch_id } = req.params;
+    fetchOperatingHoursByBranchId(branch_id)
+      .then((operating_hours) => res.status(200).send({ operating_hours }))
       .catch(next);
   };

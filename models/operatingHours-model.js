@@ -55,3 +55,9 @@ exports.removeOperatingHour = (id) => {
       return result.rows[0];
     });
 };
+
+exports.fetchOperatingHoursByBranchId = (branch_id) => {
+  return db
+    .query('SELECT * FROM operating_hours WHERE branch_id = $1;', [branch_id])
+    .then((result) => result.rows);
+};

@@ -26,6 +26,9 @@
     "GET /api/garage-chains/:chain_id/branches": {
       "description": "Retrieves all branches in a garage chain"
     },
+    "GET /api/operating-hours/branch/:branch_id": {
+      "description": "Retrieves all operating hours for a branch"
+    },
     "POST /api/branches": {
       "description": "Creates a new branch"
     },
@@ -71,6 +74,9 @@
     "GET /api/booking-types/:id": {
       "description": "Retrieves a single booking type by its id"
     },
+    "GET /api/booking-types/branch/:branch_id": {
+      "description": "retrieves all booking types from a branch"
+    },
     "POST /api/booking-types": {
       "description": "Creates a new booking type"
     },
@@ -85,6 +91,12 @@
     },
     "GET /api/bookings/:id": {
       "description": "Retrieves a single booking by its id"
+    },
+    "GET /api/bookings/branch/:branch_id": {
+      "description": "Retrieves all bookings from a branch"
+    },
+    "GET /api/bookings/branch/:branch_id/date/:date": {
+      "description": "Retrieves all bookings from a branch on a specific date"
     },
     "POST /api/bookings": {
       "description": "Creates a new booking"

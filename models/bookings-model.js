@@ -56,3 +56,23 @@ exports.removeBooking = (id) => {
       return result.rows[0];
     });
 };
+
+exports.fetchBookingsByBranchId = (branch_id) => {
+  return db
+    .query(
+      'SELECT * FROM bookings WHERE branch_id = $1 ORDER BY booking_date, booking_time;',
+      [branch_id]
+    )
+    .then((result) => result.rows);
+};
+
+exports.fetchBookingsByBranchAndDate = (branch_id, booking_date) => {
+  return db
+    .query(
+      `SELECT * FROM bookings 
+       WHERE branch_id = $1 AND booking_date = $2
+       ORDER BY booking_time;`,
+      [branch_id, booking_date]
+    )
+    .then((result) => result.rows);
+};
