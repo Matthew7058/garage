@@ -69,6 +69,7 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
         return db.query(`
           CREATE TABLE booking_types (
             id SERIAL PRIMARY KEY,
+            branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
             name VARCHAR(50) UNIQUE NOT NULL,
             price NUMERIC(10, 2)
           );
