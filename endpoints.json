@@ -53,6 +53,12 @@
     "DELETE /api/users/:id": {
       "description": "Deletes an existing user"
     },
+    "POST /api/auth/signup": {
+      "description": "Register a new user (hashes password)"
+    },
+    "POST /api/auth/login": {
+      "description": "Log in (validates password)"
+    },
     "GET /api/operating-hours": {
       "description": "Retrieves all operating hours"
     },

@@ -12,6 +12,7 @@ const usersController = require('./controllers/users-controller');
 const operatingHoursController = require('./controllers/operatingHours-controller');
 const bookingTypesController = require('./controllers/bookingTypes-controller');
 const bookingsController = require('./controllers/bookings-controller');
+const authController = require('./controllers/auth-controller');
 
 // API Documentation endpoint
 app.get('/api', endpointsController.getEndpoints);
@@ -37,6 +38,10 @@ app.get('/api/users/:id', usersController.getUserById);
 app.post('/api/users', usersController.postUser);
 app.patch('/api/users/:id', usersController.patchUser);
 app.delete('/api/users/:id', usersController.deleteUser);
+
+// Authentication endpoints
+app.post('/api/auth/signup', authController.signUp);
+app.post('/api/auth/login',  authController.logIn);
 
 // Operating Hours endpoints
 app.get('/api/operating-hours', operatingHoursController.getOperatingHours);
