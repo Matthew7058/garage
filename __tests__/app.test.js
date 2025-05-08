@@ -459,7 +459,7 @@ describe("Operating Hours Endpoints", () => {
   });
 
   // 1. Operating hours by branch
-  describe("GET /api/branchees/:branch_id/operating-hours", () => {
+  describe("GET /api/branches/:branch_id/operating-hours", () => {
     test("200: returns operating hours for branch 1", () => {
       return request(app)
         .get("/api/operating-hours/branch/1")

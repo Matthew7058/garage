@@ -1,7 +1,7 @@
 module.exports = [
       {
-        name: "Joe's Auto Services",
-        contact: "joe@example.com",
+        name: "Bakestone Motors",
+        contact: "matthewfard@hotmail.co.uk",
       },
       {
         name: "Quality Car Repair",

@@ -30,6 +30,8 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             address VARCHAR(255),
             phone VARCHAR(50),
             email VARCHAR(255),
+            lat Decimal(8,6),
+            lng Decimal(9,6),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
@@ -101,9 +103,9 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       // Insert data into branches
       .then(() => {
         const insertBranchesQuery = format(
-          `INSERT INTO branches (garage_id, branch_name, address, phone, email) VALUES %L RETURNING *;`,
-          branchesData.map(({ garage_id, branch_name, address, phone, email }) =>
-            [garage_id, branch_name, address, phone, email]
+          `INSERT INTO branches (garage_id, branch_name, address, phone, email, lat, lng) VALUES %L RETURNING *;`,
+          branchesData.map(({ garage_id, branch_name, address, phone, email, lat, lng }) =>
+            [garage_id, branch_name, address, phone, email, lat, lng]
           )
         );
         return db.query(insertBranchesQuery);

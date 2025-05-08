@@ -1,17 +1,21 @@
 module.exports = [
     {
       garage_id: 1, // Refers to Joe's Auto Services
-      branch_name: "Downtown Branch",
-      address: "123 Main St, Downtown",
+      branch_name: "Stockport",
+      address: "3 Archer Street, Stockport, SK2 7PN",
       phone: "555-1234",
-      email: "downtown@joesautos.com",
+      email: "stockport@bakestone.com",
+      lat: 53.3891254,
+      lng: -2.139149,
     },
     {
       garage_id: 1,
-      branch_name: "Uptown Branch",
-      address: "456 Elm St, Uptown",
+      branch_name: "Poynton",
+      address: "Unit 4a Adlington Ind Est, Macclesfield SK10 4NL",
       phone: "555-5678",
-      email: "uptown@joesautos.com",
+      email: "poynton@bakestone.com",
+      lat: 53.3385766,
+      lng: -2.1323687,
     },
     {
       garage_id: 2, // Refers to Quality Car Repair
@@ -19,5 +23,7 @@ module.exports = [
       address: "789 Oak St, Central City",
       phone: "555-8765",
       email: "central@qualitycarrepair.com",
+      lat: 54.3385766,
+      lng: -2.4223687,
     },
   ]
