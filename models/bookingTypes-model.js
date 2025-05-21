@@ -14,26 +14,27 @@ exports.fetchBookingTypeById = (id) => {
     });
 };
 
-exports.insertBookingType = ({ name, price }) => {
+exports.insertBookingType = ({ name, price, length }) => {
   return db
     .query(
-      `INSERT INTO booking_types (name, price)
-       VALUES ($1, $2)
+      `INSERT INTO booking_types (name, price, length)
+       VALUES ($1, $2, $3)
        RETURNING *;`,
-      [name, price]
+      [name, price, length]
     )
     .then((result) => result.rows[0]);
 };
 
-exports.updateBookingType = (id, { name, price }) => {
+exports.updateBookingType = (id, { name, price, length }) => {
   return db
     .query(
       `UPDATE booking_types
        SET name = COALESCE($1, name),
-           price = COALESCE($2, price)
-       WHERE id = $3
+           price = COALESCE($2, price),
+           length = COALESCE($3, length)
+       WHERE id = $4
        RETURNING *;`,
-      [name, price, id]
+      [name, price, length, id]
     )
     .then((result) => {
       if (result.rows.length === 0)

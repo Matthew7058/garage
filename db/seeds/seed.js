@@ -73,7 +73,8 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             id SERIAL PRIMARY KEY,
             branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
             name VARCHAR(50) UNIQUE NOT NULL,
-            price NUMERIC(10, 2)
+            price NUMERIC(10, 2),
+            length INTEGER
           );
         `);
       })
@@ -87,6 +88,8 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             booking_time TIME,
             booking_type_id INTEGER REFERENCES booking_types(id) ON DELETE CASCADE,
             status VARCHAR(50),
+            vehicle VARCHAR(20),
+            comments TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
@@ -133,8 +136,8 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       // Insert data into booking_types
       .then(() => {
         const insertBookingTypesQuery = format(
-          `INSERT INTO booking_types (branch_id, name, price) VALUES %L RETURNING *;`,
-          bookingTypesData.map(({ branch_id, name, price }) => [branch_id, name, price])
+          `INSERT INTO booking_types (branch_id, name, price, length) VALUES %L RETURNING *;`,
+          bookingTypesData.map(({ branch_id, name, price, length }) => [branch_id, name, price, length])
         );
         return db.query(insertBookingTypesQuery);
       })
@@ -142,9 +145,9 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       // Insert data into bookings
       .then(() => {
         const insertBookingsQuery = format(
-          `INSERT INTO bookings (branch_id, user_id, booking_date, booking_time, booking_type_id, status) VALUES %L RETURNING *;`,
-          bookingsData.map(({ branch_id, user_id, booking_date, booking_time, booking_type_id, status }) =>
-            [branch_id, user_id, booking_date, booking_time, booking_type_id, status]
+          `INSERT INTO bookings (branch_id, user_id, booking_date, booking_time, booking_type_id, vehicle, comments, status) VALUES %L RETURNING *;`,
+          bookingsData.map(({ branch_id, user_id, booking_date, booking_time, booking_type_id, vehicle, comments, status }) =>
+            [branch_id, user_id, booking_date, booking_time, booking_type_id, vehicle, comments, status]
           )
         );
         return db.query(insertBookingsQuery);

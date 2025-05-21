@@ -21,16 +21,16 @@ const {
   };
   
   exports.postBookingType = (req, res, next) => {
-    const { name, price } = req.body;
-    insertBookingType({ name, price })
+    const { name, price, length } = req.body;
+    insertBookingType({ name, price, length })
       .then((newType) => res.status(201).send({ booking_type: newType }))
       .catch(next);
   };
   
   exports.patchBookingType = (req, res, next) => {
     const { id } = req.params;
-    const { name, price } = req.body;
-    updateBookingType(id, { name, price })
+    const { name, price, length } = req.body;
+    updateBookingType(id, { name, price, length })
       .then((updatedType) => res.status(200).send({ booking_type: updatedType }))
       .catch(next);
   };

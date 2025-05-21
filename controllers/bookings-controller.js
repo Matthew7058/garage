@@ -29,16 +29,16 @@ const {
   };
   
   exports.postBooking = (req, res, next) => {
-    const { branch_id, user_id, booking_date, booking_time, booking_type_id, status } = req.body;
-    insertBooking({ branch_id, user_id, booking_date, booking_time, booking_type_id, status })
+    const { branch_id, user_id, booking_date, booking_time, booking_type_id, vehicle, comments, status } = req.body;
+    insertBooking({ branch_id, user_id, booking_date, booking_time, booking_type_id, vehicle, comments, status })
       .then((newBooking) => res.status(201).send({ booking: newBooking }))
       .catch(next);
   };
   
   exports.patchBooking = (req, res, next) => {
     const { id } = req.params;
-    const { branch_id, user_id, booking_date, booking_time, booking_type_id, status } = req.body;
-    updateBooking(id, { branch_id, user_id, booking_date, booking_time, booking_type_id, status })
+    const { branch_id, user_id, booking_date, booking_time, booking_type_id, vehicle, comments, status } = req.body;
+    updateBooking(id, { branch_id, user_id, booking_date, booking_time, booking_type_id, vehicle, comments, status })
       .then((updatedBooking) => res.status(200).send({ booking: updatedBooking }))
       .catch(next);
   };

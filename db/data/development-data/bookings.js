@@ -5,6 +5,8 @@ module.exports = [
       booking_date: "2025-03-20",
       booking_time: "09:00",
       booking_type_id: 1,
+      vehicle: "FJ32 RJX",
+      comments: "Broke engine",
       status: "confirmed",
     },
     {
@@ -13,6 +15,8 @@ module.exports = [
       booking_date: "2025-03-20",
       booking_time: "10:00",
       booking_type_id: 1,
+      vehicle: "PO69 YML",
+      comments: "Fix brakes",
       status: "pending",
     },
     {
@@ -21,6 +25,8 @@ module.exports = [
       booking_date: "2025-03-21",
       booking_time: "11:00",
       booking_type_id: 2,
+      vehicle: "AB12 CDE",
+      comments: "Smells of smoke",
       status: "confirmed",
     },
     {
@@ -29,6 +35,8 @@ module.exports = [
       booking_date: "2025-03-22",
       booking_time: "14:00",
       booking_type_id: 3,
+      vehicle: "XY99 ZZZ",
+      comments: "Oil change due on dashboard",
       status: "confirmed",
     },
   ]
