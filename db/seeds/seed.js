@@ -30,8 +30,8 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             address VARCHAR(255),
             phone VARCHAR(50),
             email VARCHAR(255),
-            lat Decimal(8,6),
-            lng Decimal(9,6),
+            lat Decimal(9,7),
+            lng Decimal(10,7),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );

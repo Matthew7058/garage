@@ -1,3 +1,5 @@
+require('cross-fetch/polyfill');
+
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -5,6 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // Import controllers
+
 const endpointsController = require('./controllers/endpoints-controller');
 const garageChainsController = require('./controllers/garageChains-controller');
 const branchesController = require('./controllers/branches-controller');
@@ -13,6 +16,7 @@ const operatingHoursController = require('./controllers/operatingHours-controlle
 const bookingTypesController = require('./controllers/bookingTypes-controller');
 const bookingsController = require('./controllers/bookings-controller');
 const authController = require('./controllers/auth-controller');
+const { getMotHistory } = require('./controllers/motHistory-controller');
 
 // API Documentation endpoint
 app.get('/api', endpointsController.getEndpoints);
@@ -42,6 +46,9 @@ app.delete('/api/users/:id', usersController.deleteUser);
 // Authentication endpoints
 app.post('/api/auth/signup', authController.signUp);
 app.post('/api/auth/login',  authController.logIn);
+
+// new MOT-history endpoint:
+app.get('/api/mot-history/:vrn', getMotHistory);
 
 // Operating Hours endpoints
 app.get('/api/operating-hours', operatingHoursController.getOperatingHours);
