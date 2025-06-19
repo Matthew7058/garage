@@ -20,7 +20,7 @@ router.post('/send-confirmation-email', async (req, res) => {
     const formattedDate = `${day}-${month}-${year}`;
     const formattedTime = time.slice(0,5);
 
-    const { id: messageId } = await resend.emails.send({
+    const result = await resend.emails.send({
       from: `Your Garage <no-reply@${process.env.EMAIL_DOMAIN}>`,
       to: [email],
       subject: 'Your Booking Confirmation',
@@ -33,6 +33,11 @@ router.post('/send-confirmation-email', async (req, res) => {
         <p>We look forward to seeing you.</p>
       `
     });
+    const messageId = result.data?.id;
+    if (result.error) {
+      console.error('Email send failed:', result.error);
+      return res.status(500).json({ message: 'Server error sending confirmation email.' });
+    }
 
     console.log(`Email sent; Resend message ID: ${messageId}`);
     return res.json({ message: 'Confirmation email sent', messageId });
