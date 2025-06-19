@@ -1,0 +1,47 @@
+// controllers/confirmationEmail-controller.js
+
+const { Resend } = require('resend');
+
+// Initialize Resend client with API key from environment
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+/**
+ * Controller to send booking confirmation emails via Resend
+ * Expects JSON body with: email, bookingId, date, time, service, branchName
+ */
+async function sendConfirmationEmail(req, res) {
+  const { email, bookingId, date, time, service, branchName } = req.body;
+
+  if (!email || !bookingId || !date || !time || !service || !branchName) {
+    return res.status(400).json({ message: 'Missing required fields in request body.' });
+  }
+
+  try {
+    // Format date and time for human-friendly output
+    const [year, month, day] = date.split('-');
+    const formattedDate = `${day}-${month}-${year}`;
+    const formattedTime = time.slice(0,5);
+
+    // Send email through Resend
+    const { id: messageId } = await resend.emails.send({
+      from: `Your Garage <no-reply@${process.env.EMAIL_DOMAIN}>`,
+      to: [email],
+      subject: 'Your Booking Confirmation',
+      html: `
+        <p>Hi there,</p>
+        <p>Thanks for booking your <strong>${service}</strong> at <strong>${branchName}</strong>!</p>
+        <p><strong>Date:</strong> ${formattedDate}<br />
+           <strong>Time:</strong> ${formattedTime}</p>
+        <p>Your booking reference is <strong>${bookingId}</strong>.</p>
+        <p>We look forward to seeing you.</p>
+      `
+    });
+
+    return res.json({ message: 'Confirmation email sent', messageId });
+  } catch (err) {
+    console.error('Error sending confirmation email:', err);
+    return res.status(500).json({ message: 'Server error sending confirmation email.' });
+  }
+}
+
+module.exports = { sendConfirmationEmail };
