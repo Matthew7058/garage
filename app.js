@@ -17,7 +17,7 @@ const bookingTypesController = require('./controllers/bookingTypes-controller');
 const bookingsController = require('./controllers/bookings-controller');
 const authController = require('./controllers/auth-controller');
 const { getMotHistory } = require('./controllers/motHistory-controller');
-const { sendConfirmationEmail } = require('./controllers/resend-controller');
+const confirmationEmailRouter = require('./controllers/resend-controller');
 
 // API Documentation endpoint
 app.get('/api', endpointsController.getEndpoints);
@@ -51,8 +51,8 @@ app.post('/api/auth/login',  authController.logIn);
 // new MOT-history endpoint:
 app.get('/api/mot-history/:vrn', getMotHistory);
 
-// Resend Endpoint:
-app.post('/api/send-confirmation-email', sendConfirmationEmail);
+// Resend email endpoint mounted under /api
+app.use('/api', confirmationEmailRouter);
 
 // Operating Hours endpoints
 app.get('/api/operating-hours', operatingHoursController.getOperatingHours);

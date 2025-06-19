@@ -5,11 +5,10 @@ const { Resend } = require('resend');
 // Initialize Resend client with API key from environment
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-/**
- * Controller to send booking confirmation emails via Resend
- * Expects JSON body with: email, bookingId, date, time, service, branchName
- */
-async function sendConfirmationEmail(req, res) {
+const express = require('express');
+const router = express.Router();
+
+router.post('/send-confirmation-email', async (req, res) => {
   const { email, bookingId, date, time, service, branchName } = req.body;
 
   if (!email || !bookingId || !date || !time || !service || !branchName) {
@@ -17,12 +16,10 @@ async function sendConfirmationEmail(req, res) {
   }
 
   try {
-    // Format date and time for human-friendly output
     const [year, month, day] = date.split('-');
     const formattedDate = `${day}-${month}-${year}`;
     const formattedTime = time.slice(0,5);
 
-    // Send email through Resend
     const { id: messageId } = await resend.emails.send({
       from: `Your Garage <no-reply@${process.env.EMAIL_DOMAIN}>`,
       to: [email],
@@ -37,11 +34,14 @@ async function sendConfirmationEmail(req, res) {
       `
     });
 
+    console.log(`Email sent; Resend message ID: ${messageId}`);
     return res.json({ message: 'Confirmation email sent', messageId });
   } catch (err) {
-    console.error('Error sending confirmation email:', err);
-    return res.status(500).json({ message: 'Server error sending confirmation email.' });
+    console.error('Email send failed:', err);
+    return res
+      .status(500)
+      .json({ message: 'Server error sending confirmation email.' });
   }
-}
+});
 
-module.exports = { sendConfirmationEmail };
+module.exports = router;
