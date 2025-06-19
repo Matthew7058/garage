@@ -6,7 +6,7 @@ const {
 
 // POST /api/auth/signup
 exports.signUp = (req, res, next) => {
-  const { garage_id, first_name, last_name, email, password } = req.body;
+  const { garage_id, first_name, last_name, email, phone, password } = req.body;
 
   // 1) Make sure email isn't taken
   fetchUserByEmail(email)
