@@ -773,19 +773,28 @@ describe('Auth Endpoints', () => {
     first_name: 'Cheeky',
     last_name: 'Chappy',
     email: `cheeky${Date.now()}@example.com`,
+    role: 'temporary',
+    password: 'sneakyPass123'
+  };
+  const testUser2 = {
+    garage_id: 1,
+    first_name: 'Cheeky',
+    last_name: 'Guy',
+    email: `cheeky${Date.now()}@example.com`,
+    role: 'customer',
     password: 'sneakyPass123'
   };
 
   describe('POST /api/auth/signup', () => {
-    test('201 then 409 on duplicate signup in one go', () => {
+    test('201 then 409 on duplicate signup in one go when role is customer', () => {
       return request(app)
         .post('/api/auth/signup')
-        .send(testUser)
+        .send(testUser2)
         .expect(201)
         .then(() => {
           return request(app)
             .post('/api/auth/signup')
-            .send(testUser)
+            .send(testUser2)
             .expect(409)
             .then(({ body: { msg } }) => {
               expect(msg).toMatch(/Email already in use/i);

@@ -10,7 +10,12 @@ exports.signUp = (req, res, next) => {
 
   // 1) Make sure email isn't taken
   fetchUserByEmail(email)
-    .then(() => Promise.reject({ status: 409, msg: 'Email already in use' }))
+    .then((user) => {
+      console.log(user);
+      if(user.role === 'customer') {
+        return Promise.reject({ status: 409, msg: 'Email already in use' });
+      }
+    })
     .catch((err) => {
       if (err.status !== 404) throw err;
       // 2) Hash the password
