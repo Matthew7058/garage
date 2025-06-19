@@ -23,7 +23,7 @@ exports.signUp = (req, res, next) => {
         first_name,
         last_name,
         email,
-        phone: '',
+        phone,
         password_hash: hash,
         role: 'customer'
       });
