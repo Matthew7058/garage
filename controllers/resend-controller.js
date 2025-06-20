@@ -25,8 +25,6 @@ router.post('/send-confirmation-email', async (req, res) => {
       to: [email],
       subject: 'Your Booking Confirmation',
       html: `
-        <!DOCTYPE html>
-<html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -79,7 +77,7 @@ router.post('/send-confirmation-email', async (req, res) => {
                       </tr>
                       <tr>
                         <td style="font-weight:bold;">Vehicle</td>
-                        <td style="text-align:right;">${vehicle || 'N/A'}</td>
+                        <td style="text-align:right;">${ 'N/A'}</td>
                       </tr>
                     </table>
                   </td>
@@ -106,7 +104,7 @@ router.post('/send-confirmation-email', async (req, res) => {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:20px; background:#fafafa; font-size:12px; color:#999999;">
-              &copy; ${new Date().getFullYear()} Your Garage. All rights reserved.
+              &copy;  Your Garage. All rights reserved.
             </td>
           </tr>
         </table>
@@ -114,7 +112,6 @@ router.post('/send-confirmation-email', async (req, res) => {
     </tr>
   </table>
 </body>
-</html>
         <p>Hi there,</p>
         <p>Thanks for booking your <strong>${service}</strong> at <strong>${branchName}</strong>!</p>
         <p><strong>Date:</strong> ${formattedDate}<br />
