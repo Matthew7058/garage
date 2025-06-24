@@ -84,17 +84,15 @@ router.post('/send-confirmation-email', async (req, res) => {
                   </td>
                   <!-- Map Column -->
                   <td valign="top" width="50%" style="padding-left:10px;">
-                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchName)}" target="_blank">
-                      <img 
-                        src="https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(branchName)}&zoom=14&size=400x250&markers=color:red%7C${encodeURIComponent(branchName)}" 
-                        width="100%" 
-                        alt="Map to Bakestone motors ${branchName}" 
-                        style="border-radius:4px;"
-                      />
-                    </a>
+                    <img
+                      src="https://raw.githubusercontent.com/Matthew7058/garage_images/main/1.png"
+                      width="100%"
+                      alt="Photo of {{branchName}}"
+                      style="border-radius:4px;"
+                    />
                     <p style="text-align:center; margin:8px 0 0; font-size:12px; color:#777777;">
                       <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapSearch)}" target="_blank" style="color:#0c2e6e;text-decoration:none;">
-                        View on Google maps
+                        View on Google Maps
                       </a>
                     </p>
                   </td>
