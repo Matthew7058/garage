@@ -10,6 +10,7 @@ const router = express.Router();
 
 router.post('/send-confirmation-email', async (req, res) => {
   const { email, bookingId, date, time, service, branchName } = req.body;
+  const mapSearch = `Bakestone Motors ${branchName}`;
 
   if (!email || !bookingId || !date || !time || !service || !branchName) {
     return res.status(400).json({ message: 'Missing required fields in request body.' });
@@ -87,13 +88,13 @@ router.post('/send-confirmation-email', async (req, res) => {
                       <img 
                         src="https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(branchName)}&zoom=14&size=400x250&markers=color:red%7C${encodeURIComponent(branchName)}" 
                         width="100%" 
-                        alt="Map to ${branchName}" 
+                        alt="Map to Bakestone motors ${branchName}" 
                         style="border-radius:4px;"
                       />
                     </a>
                     <p style="text-align:center; margin:8px 0 0; font-size:12px; color:#777777;">
-                      <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchName)}" target="_blank" style="color:#0c2e6e;text-decoration:none;">
-                        View larger map
+                      <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapSearch)}" target="_blank" style="color:#0c2e6e;text-decoration:none;">
+                        View on Google maps
                       </a>
                     </p>
                   </td>
@@ -104,7 +105,7 @@ router.post('/send-confirmation-email', async (req, res) => {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:20px; background:#fafafa; font-size:12px; color:#999999;">
-              &copy;  Your Garage. All rights reserved.
+              &copy;  Bakestone Motors. All rights reserved.
             </td>
           </tr>
         </table>
