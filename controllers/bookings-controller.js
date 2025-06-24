@@ -5,7 +5,9 @@ const {
     updateBooking,
     removeBooking,
     fetchBookingsByBranchId,
-    fetchBookingsByBranchAndDate
+    fetchBookingsByBranchAndDate,
+    fetchBookingsByUserEmail,
+    searchBookingsByUserName
   } = require('../models/bookings-model');
 
   function formatLocalDate(dateObj) {
@@ -69,3 +71,20 @@ const {
     })
     .catch(next);
   };
+
+// 1) Controller for GET /bookings/user/email/:email
+exports.getBookingsByUserEmail = (req, res, next) => {
+  const { email } = req.params;
+  fetchBookingsByUserEmail(email)
+    .then((bookings) => res.status(200).send({ bookings }))
+    .catch(next);
+};
+
+// 2) Controller for GET /bookings/search?name=foo
+exports.searchBookingsByUserName = (req, res, next) => {
+  const { name } = req.params;
+  if (!name) return res.status(400).send({ msg: "Query parameter 'name' is required" });
+  searchBookingsByUserName(name)
+    .then((bookings) => res.status(200).send({ bookings }))
+    .catch(next);
+};

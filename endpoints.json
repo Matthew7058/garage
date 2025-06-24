@@ -104,6 +104,12 @@
     "GET /api/bookings/branch/:branch_id/date/:date": {
       "description": "Retrieves all bookings from a branch on a specific date"
     },
+    "GET /api/bookings/user/email/:email": {
+      "description": "Retrieves all bookings made by a user with a specific email"
+    },
+    "GET /api/bookings/user/search/:name": {
+      "description": "Searches all bookings by a user's name"
+    },
     "POST /api/bookings": {
       "description": "Creates a new booking"
     },

@@ -858,3 +858,63 @@ describe("Invalid Routes", () => {
       });
   });
 });
+
+// --------------------
+// Bookings by User Email & Name
+// --------------------
+describe("GET /api/bookings/user/email/:email", () => {
+  test("200: responds with only that user's bookings", () => {
+    const testUser = usersData[0];
+    return request(app)
+      .get(`/api/bookings/user/email/${testUser.email}`)
+      .expect(200)
+      .then(({ body: { bookings } }) => {
+        expect(Array.isArray(bookings)).toBe(true);
+        expect(bookings.length).toBeGreaterThan(0);
+        // all bookings must share the same user_id
+        const firstUid = bookings[0].user_id;
+        bookings.forEach((b) => {
+          expect(b).toHaveProperty("user_id", firstUid);
+        });
+      });
+  });
+
+  test("200: responds with an empty array for an unknown email", () => {
+    return request(app)
+      .get("/api/bookings/user/email/noone@example.com")
+      .expect(200)
+      .then(({ body: { bookings } }) => {
+        expect(Array.isArray(bookings)).toBe(true);
+        expect(bookings).toHaveLength(0);
+      });
+  });
+});
+
+describe("GET /api/bookings/user/search/:name", () => {
+  test("200: responds with bookings for a matching (first) name", () => {
+    const testUser = usersData[1];
+    const nameParam = testUser.first_name.toUpperCase(); // test case-insensitivity
+    return request(app)
+      .get(`/api/bookings/user/search/${nameParam}`)
+      .expect(200)
+      .then(({ body: { bookings } }) => {
+        expect(Array.isArray(bookings)).toBe(true);
+        expect(bookings.length).toBeGreaterThan(0);
+        // again, every booking should belong to the same user_id
+        const firstUid = bookings[0].user_id;
+        bookings.forEach((b) => {
+          expect(b).toHaveProperty("user_id", firstUid);
+        });
+      });
+  });
+
+  test("200: responds with an empty array if no name matches", () => {
+    return request(app)
+      .get("/api/bookings/user/search/DefinitelyNotAName")
+      .expect(200)
+      .then(({ body: { bookings } }) => {
+        expect(Array.isArray(bookings)).toBe(true);
+        expect(bookings).toHaveLength(0);
+      });
+  });
+});

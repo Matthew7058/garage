@@ -78,3 +78,34 @@ exports.fetchBookingsByBranchAndDate = (branch_id, booking_date) => {
     )
     .then((result) => result.rows);
 };
+
+// 1) Fetch by user email
+exports.fetchBookingsByUserEmail = (email) => {
+  return db
+    .query(
+      `SELECT b.*
+         FROM bookings AS b
+         JOIN users    AS u ON b.user_id = u.id
+        WHERE u.email = $1
+        ORDER BY b.booking_date, b.booking_time;`,
+      [email]
+    )
+    .then((result) => result.rows);
+};
+
+// 2) Search by user name (first, last, or full)
+exports.searchBookingsByUserName = (name) => {
+  const term = `%${name}%`;
+  return db
+    .query(
+      `SELECT b.*
+         FROM bookings AS b
+         JOIN users    AS u ON b.user_id = u.id
+        WHERE u.first_name    ILIKE $1
+           OR u.last_name     ILIKE $1
+           OR (u.first_name || ' ' || u.last_name) ILIKE $1
+        ORDER BY b.booking_date, b.booking_time;`,
+      [term]
+    )
+    .then((result) => result.rows);
+};

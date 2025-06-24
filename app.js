@@ -78,6 +78,8 @@ app.get('/api/bookings/:id', bookingsController.getBookingById);
 app.post('/api/bookings', bookingsController.postBooking);
 app.patch('/api/bookings/:id', bookingsController.patchBooking);
 app.delete('/api/bookings/:id', bookingsController.deleteBooking);
+app.get('/api/bookings/user/email/:email', bookingsController.getBookingsByUserEmail);
+app.get('/api/bookings/user/search/:name', bookingsController.searchBookingsByUserName);
 
 // 404 error for any undefined route
 app.all('*', (req, res) => {
