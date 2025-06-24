@@ -85,7 +85,7 @@ router.post('/send-confirmation-email', async (req, res) => {
                   <!-- Map Column -->
                   <td valign="top" width="50%" style="padding-left:10px;">
                     <img
-                      src="https://raw.githubusercontent.com/Matthew7058/garage_images/main/1.png"
+                      src="https://cdn.jsdelivr.net/gh/Matthew7058/garage_images@main/1.png"
                       width="100%"
                       alt="Photo of {{branchName}}"
                       style="border-radius:4px;"
