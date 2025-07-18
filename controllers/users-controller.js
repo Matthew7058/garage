@@ -20,16 +20,16 @@ const {
   };
   
   exports.postUser = (req, res, next) => {
-    const { garage_id, first_name, last_name, email, phone, password_hash, role } = req.body;
-    insertUser({ garage_id, first_name, last_name, email, phone, password_hash, role })
+    const { garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode } = req.body;
+    insertUser({ garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode })
       .then((newUser) => res.status(201).send({ user: newUser }))
       .catch(next);
   };
   
   exports.patchUser = (req, res, next) => {
     const { id } = req.params;
-    const { garage_id, first_name, last_name, email, phone, password_hash, role } = req.body;
-    updateUser(id, { garage_id, first_name, last_name, email, phone, password_hash, role })
+    const { garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode } = req.body;
+    updateUser(id, { garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode })
       .then((updatedUser) => res.status(200).send({ user: updatedUser }))
       .catch(next);
   };

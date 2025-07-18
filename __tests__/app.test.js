@@ -274,6 +274,17 @@ describe("Users Endpoints", () => {
           expect(user).toHaveProperty("id", 1);
         });
     });
+
+    test("200: responds with address & postcode fields", () => {
+      return request(app)
+        .get("/api/users/1")
+        .expect(200)
+        .then(({ body: { user } }) => {
+          expect(user).toHaveProperty("address");
+          expect(user).toHaveProperty("postcode");
+        });
+    });
+
     test("404: Responds with error if user not found", () => {
       return request(app)
         .get("/api/users/9999")
@@ -293,7 +304,9 @@ describe("Users Endpoints", () => {
         email: "johndoe@example.com",
         phone: "1234567890",
         password_hash: "hashedpassword",
-        role: "customer"
+        role: "customer",
+        address: "221B Baker St",
+        postcode: "NW1 6XE"
       };
       return request(app)
         .post("/api/users")
@@ -302,6 +315,8 @@ describe("Users Endpoints", () => {
         .then(({ body: { user } }) => {
           expect(user).toHaveProperty("id");
           expect(user.first_name).toBe(newUser.first_name);
+          expect(user.address).toBe(newUser.address);
+          expect(user.postcode).toBe(newUser.postcode);
         });
     });
   });
@@ -325,6 +340,22 @@ describe("Users Endpoints", () => {
           expect(user.role).toBe(updatedData.role);
         });
     });
+
+    test("200: Updates a user's address & postcode", () => {
+      const updatedAddress = {
+        address: "42 Wallaby Way",
+        postcode: "2000"
+      };
+      return request(app)
+        .patch("/api/users/1")
+        .send(updatedAddress)
+        .expect(200)
+        .then(({ body: { user } }) => {
+          expect(user.address).toBe(updatedAddress.address);
+          expect(user.postcode).toBe(updatedAddress.postcode);
+        });
+    });
+
     test("404: Returns error if user not found", () => {
       const updatedData = { first_name: "Jane" };
       return request(app)

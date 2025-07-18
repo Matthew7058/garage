@@ -14,18 +14,18 @@ exports.fetchUserById = (id) => {
     });
 };
 
-exports.insertUser = ({ garage_id, first_name, last_name, email, phone, password_hash, role }) => {
+exports.insertUser = ({ garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode }) => {
   return db
     .query(
-      `INSERT INTO users (garage_id, first_name, last_name, email, phone, password_hash, role)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO users (garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *;`,
-      [garage_id, first_name, last_name, email, phone, password_hash, role]
+      [garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode]
     )
     .then((result) => result.rows[0]);
 };
 
-exports.updateUser = (id, { garage_id, first_name, last_name, email, phone, password_hash, role }) => {
+exports.updateUser = (id, { garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode }) => {
   return db
     .query(
       `UPDATE users
@@ -36,10 +36,12 @@ exports.updateUser = (id, { garage_id, first_name, last_name, email, phone, pass
            phone = COALESCE($5, phone),
            password_hash = COALESCE($6, password_hash),
            role = COALESCE($7, role),
+           address = COALESCE($8, address),
+           postcode = COALESCE($9, postcode),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $8
+       WHERE id = $10
        RETURNING *;`,
-      [garage_id, first_name, last_name, email, phone, password_hash, role, id]
+      [garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode, id]
     )
     .then((result) => {
       if (result.rows.length === 0)

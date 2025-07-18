@@ -48,6 +48,8 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             phone VARCHAR(50),
             password_hash VARCHAR(255),
             role VARCHAR(50),
+            address VARCHAR(255),
+            postcode VARCHAR(20), 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
@@ -116,9 +118,9 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       // Insert data into users
       .then(() => {
         const insertUsersQuery = format(
-          `INSERT INTO users (garage_id, first_name, last_name, email, phone, password_hash, role) VALUES %L RETURNING *;`,
-          usersData.map(({ garage_id, first_name, last_name, email, phone, password_hash, role }) =>
-            [garage_id, first_name, last_name, email, phone, password_hash, role]
+          `INSERT INTO users (garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode) VALUES %L RETURNING *;`,
+          usersData.map(({ garage_id, first_name, last_name, email, phone, password_hash, address, postcode, role }) =>
+            [garage_id, first_name, last_name, email, phone, password_hash, address, postcode, role]
           )
         );
         return db.query(insertUsersQuery);

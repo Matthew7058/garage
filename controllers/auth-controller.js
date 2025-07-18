@@ -7,7 +7,7 @@ const {
 
 // POST /api/auth/signup
 exports.signUp = (req, res, next) => {
-  const { garage_id, first_name, last_name, email, phone, password } = req.body;
+  const { garage_id, first_name, last_name, email, phone, password, address, postcode } = req.body;
 
   // 1) Make sure email isn't taken
   fetchUsersByEmail(email)
@@ -31,7 +31,9 @@ exports.signUp = (req, res, next) => {
         email,
         phone,
         password_hash: hash,
-        role: 'customer'
+        role: 'customer',
+        address,
+        postcode
       });
     })
     .then((newUser) => {
