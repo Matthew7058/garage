@@ -14,18 +14,18 @@ exports.fetchOperatingHourById = (id) => {
     });
 };
 
-exports.insertOperatingHour = ({ branch_id, day_of_week, open_time, close_time, capacity_per_hour }) => {
+exports.insertOperatingHour = ({ branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity }) => {
   return db
     .query(
-      `INSERT INTO operating_hours (branch_id, day_of_week, open_time, close_time, capacity_per_hour)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO operating_hours (branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *;`,
-      [branch_id, day_of_week, open_time, close_time, capacity_per_hour]
+      [branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity]
     )
     .then((result) => result.rows[0]);
 };
 
-exports.updateOperatingHour = (id, { branch_id, day_of_week, open_time, close_time, capacity_per_hour }) => {
+exports.updateOperatingHour = (id, { branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity }) => {
   return db
     .query(
       `UPDATE operating_hours
@@ -34,10 +34,11 @@ exports.updateOperatingHour = (id, { branch_id, day_of_week, open_time, close_ti
            open_time = COALESCE($3, open_time),
            close_time = COALESCE($4, close_time),
            capacity_per_hour = COALESCE($5, capacity_per_hour),
+           daily_capacity   = COALESCE($6, daily_capacity),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6
+       WHERE id = $7
        RETURNING *;`,
-      [branch_id, day_of_week, open_time, close_time, capacity_per_hour, id]
+      [branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity, id]
     )
     .then((result) => {
       if (result.rows.length === 0)

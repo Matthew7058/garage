@@ -1,10 +1,11 @@
 const format = require('pg-format');
 const db = require('../connection');
 
-const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, branchesData }) => {
+const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData }) => {
     // Drop tables in order (most dependent first)
     return db.query(`DROP TABLE IF EXISTS bookings;`)
       .then(() => db.query(`DROP TABLE IF EXISTS booking_types;`))
+      .then(() => db.query('DROP TABLE IF EXISTS operating_hours_override;'))
       .then(() => db.query(`DROP TABLE IF EXISTS operating_hours;`))
       .then(() => db.query(`DROP TABLE IF EXISTS users;`))
       .then(() => db.query(`DROP TABLE IF EXISTS branches;`))
@@ -47,9 +48,9 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             email VARCHAR(255) NOT NULL,
             phone VARCHAR(50),
             password_hash VARCHAR(255),
-            role VARCHAR(50),
             address VARCHAR(255),
-            postcode VARCHAR(20), 
+            postcode VARCHAR(20),
+            role VARCHAR(50), 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
@@ -64,8 +65,27 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             open_time TIME,
             close_time TIME,
             capacity_per_hour INTEGER,
+            daily_capacity INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+      })
+      .then(() => {
+        return db.query(`
+          CREATE TABLE operating_hours_override (
+            id SERIAL PRIMARY KEY,
+            branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
+            date DATE       NOT NULL,
+            is_closed BOOLEAN DEFAULT FALSE,
+            open_time TIME,
+            close_time TIME,
+            capacity_per_hour INTEGER,
+            daily_capacity INTEGER,
+            reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (branch_id, date)
           );
         `);
       })
@@ -118,7 +138,7 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       // Insert data into users
       .then(() => {
         const insertUsersQuery = format(
-          `INSERT INTO users (garage_id, first_name, last_name, email, phone, password_hash, role, address, postcode) VALUES %L RETURNING *;`,
+          `INSERT INTO users (garage_id, first_name, last_name, email, phone, password_hash, address, postcode, role) VALUES %L RETURNING *;`,
           usersData.map(({ garage_id, first_name, last_name, email, phone, password_hash, address, postcode, role }) =>
             [garage_id, first_name, last_name, email, phone, password_hash, address, postcode, role]
           )
@@ -128,12 +148,31 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       // Insert data into operating_hours
       .then(() => {
         const insertOperatingHoursQuery = format(
-          `INSERT INTO operating_hours (branch_id, day_of_week, open_time, close_time, capacity_per_hour) VALUES %L RETURNING *;`,
-          hoursData.map(({ branch_id, day_of_week, open_time, close_time, capacity_per_hour }) =>
-            [branch_id, day_of_week, open_time, close_time, capacity_per_hour]
+          `INSERT INTO operating_hours (branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity) VALUES %L RETURNING *;`,
+          hoursData.map(({ branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity }) =>
+            [branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity]
           )
         );
         return db.query(insertOperatingHoursQuery);
+      })
+      // Insert data into operating_hours_override
+      .then(() => {
+        const insertOverridesQuery = format(
+          `INSERT INTO operating_hours_override
+            (branch_id, date, is_closed, open_time, close_time, capacity_per_hour, daily_capacity, reason)
+          VALUES %L RETURNING *;`,
+          overridesData.map(({ branch_id, date, is_closed, open_time, close_time, capacity_per_hour, daily_capacity, reason }) => [
+            branch_id,
+            date,
+            is_closed,
+            open_time,
+            close_time,
+            capacity_per_hour, 
+            daily_capacity,
+            reason,
+          ])
+        );
+        return db.query(insertOverridesQuery);
       })
       // Insert data into booking_types
       .then(() => {

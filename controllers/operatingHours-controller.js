@@ -21,16 +21,16 @@ const {
   };
   
   exports.postOperatingHour = (req, res, next) => {
-    const { branch_id, day_of_week, open_time, close_time, capacity_per_hour } = req.body;
-    insertOperatingHour({ branch_id, day_of_week, open_time, close_time, capacity_per_hour })
+    const { branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity } = req.body;
+    insertOperatingHour({ branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity })
       .then((newHour) => res.status(201).send({ operating_hour: newHour }))
       .catch(next);
   };
   
   exports.patchOperatingHour = (req, res, next) => {
     const { id } = req.params;
-    const { branch_id, day_of_week, open_time, close_time, capacity_per_hour } = req.body;
-    updateOperatingHour(id, { branch_id, day_of_week, open_time, close_time, capacity_per_hour })
+    const { branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity } = req.body;
+    updateOperatingHour(id, { branch_id, day_of_week, open_time, close_time, capacity_per_hour, daily_capacity })
       .then((updatedHour) => res.status(200).send({ operating_hour: updatedHour }))
       .catch(next);
   };

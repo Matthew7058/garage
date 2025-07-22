@@ -6,11 +6,11 @@ const app = require('../app');
 const request = require('supertest');
 const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
-const { chainsData, usersData, bookingsData, bookingTypesData, hoursData, branchesData } = require("../db/data/test-data/index");
+const { chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData } = require("../db/data/test-data/index");
 
 /* Set up your beforeEach & afterAll functions here */
 
-beforeEach(() => seed({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, branchesData }));
+beforeEach(() => seed({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData }));
 afterAll(() => db.end());
 
 describe("GET /api", () => {
@@ -400,6 +400,10 @@ describe("Operating Hours Endpoints", () => {
         .then(({ body: { operating_hours } }) => {
           expect(Array.isArray(operating_hours)).toBe(true);
           expect(operating_hours.length).toBeGreaterThan(0);
+          operating_hours.forEach((oh) => {
+            expect(oh).toHaveProperty('daily_capacity');
+            expect(oh).toHaveProperty('capacity_per_hour');
+          });
         });
     });
   });
@@ -411,6 +415,8 @@ describe("Operating Hours Endpoints", () => {
         .expect(200)
         .then(({ body: { operating_hour } }) => {
           expect(operating_hour).toHaveProperty("id", 1);
+          expect(operating_hour).toHaveProperty('daily_capacity');
+          expect(operating_hour).toHaveProperty('capacity_per_hour');
         });
     });
     test("404: Responds with error if operating hour not found", () => {
@@ -430,7 +436,8 @@ describe("Operating Hours Endpoints", () => {
         day_of_week: 3,
         open_time: "09:00:00",
         close_time: "17:00:00",
-        capacity_per_hour: 5
+        daily_capacity: 20,
+        capacity_per_hour: 2,
       };
       return request(app)
         .post("/api/operating-hours")
@@ -439,6 +446,8 @@ describe("Operating Hours Endpoints", () => {
         .then(({ body: { operating_hour } }) => {
           expect(operating_hour).toHaveProperty("id");
           expect(operating_hour.day_of_week).toBe(newHour.day_of_week);
+          expect(operating_hour).toHaveProperty('daily_capacity', newHour.daily_capacity);
+          expect(operating_hour).toHaveProperty('capacity_per_hour', newHour.capacity_per_hour);
         });
     });
   });
@@ -447,7 +456,9 @@ describe("Operating Hours Endpoints", () => {
     test("200: Updates an operating hour record", () => {
       const updatedData = {
         open_time: "10:00:00",
-        close_time: "18:00:00"
+        close_time: "18:00:00",
+        daily_capacity: 25,
+        capacity_per_hour: 3,
       };
       return request(app)
         .patch("/api/operating-hours/1")
@@ -456,6 +467,8 @@ describe("Operating Hours Endpoints", () => {
         .then(({ body: { operating_hour } }) => {
           expect(operating_hour.open_time).toBe(updatedData.open_time);
           expect(operating_hour.close_time).toBe(updatedData.close_time);
+          expect(operating_hour).toHaveProperty('daily_capacity', updatedData.daily_capacity);
+          expect(operating_hour).toHaveProperty('capacity_per_hour', updatedData.capacity_per_hour);
         });
     });
     test("404: Returns error if operating hour not found", () => {
@@ -502,6 +515,8 @@ describe("Operating Hours Endpoints", () => {
             expect(oh).toHaveProperty("branch_id", 1);
             expect(oh).toHaveProperty("open_time");
             expect(oh).toHaveProperty("close_time");
+            expect(oh).toHaveProperty('daily_capacity');
+            expect(oh).toHaveProperty('capacity_per_hour');
           });
         });
     });
@@ -518,6 +533,148 @@ describe("Operating Hours Endpoints", () => {
   });
 });
 
+// --------------------
+// Operating Hours Override Endpoints
+// --------------------
+describe("Operating Hours Override Endpoints", () => {
+  describe("GET /api/operating-hours-override", () => {
+    test("200: Responds with all overrides", () => {
+      return request(app)
+        .get("/api/operating-hours-override")
+        .expect(200)
+        .then(({ body: { overrides } }) => {
+          expect(Array.isArray(overrides)).toBe(true);
+          expect(overrides.length).toBeGreaterThan(0);
+          overrides.forEach((ov) => {
+            expect(ov).toHaveProperty("id");
+            expect(ov).toHaveProperty("branch_id");
+            expect(ov).toHaveProperty("date");
+            expect(ov).toHaveProperty("is_closed");
+            expect(ov).toHaveProperty("daily_capacity");
+            expect(ov).toHaveProperty("reason");
+            expect(ov).toHaveProperty("capacity_per_hour");
+          });
+        });
+    });
+  });
+
+  describe("GET /api/operating-hours-override/:id", () => {
+    test("200: Responds with a single override record", () => {
+      return request(app)
+        .get("/api/operating-hours-override/1")
+        .expect(200)
+        .then(({ body: { override } }) => {
+          expect(override).toHaveProperty("id", 1);
+          expect(override).toHaveProperty("branch_id");
+          expect(override).toHaveProperty("date");
+          expect(override).toHaveProperty("is_closed");
+          expect(override).toHaveProperty("capacity_per_hour");
+        });
+    });
+    test("404: Responds with error if override not found", () => {
+      return request(app)
+        .get("/api/operating-hours-override/9999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Override not found");
+        });
+    });
+  });
+
+  describe("POST /api/operating-hours-override", () => {
+    test("201: Creates a new override", () => {
+      const newOv = {
+        branch_id: 1,
+        date: "2025-10-01",
+        is_closed: false,
+        open_time: "08:00:00",
+        close_time: "12:00:00",
+        daily_capacity: 6,
+        capacity_per_hour: 2,
+        reason: "Test override",
+      };
+      return request(app)
+        .post("/api/operating-hours-override")
+        .send(newOv)
+        .expect(201)
+        .then(({ body: { override } }) => {
+          expect(override).toHaveProperty("id");
+          expect(override.branch_id).toBe(newOv.branch_id);
+          expect(override.date).toBe(newOv.date);
+          expect(override.is_closed).toBe(newOv.is_closed);
+          expect(override.daily_capacity).toBe(newOv.daily_capacity);
+          expect(override.capacity_per_hour).toBe(newOv.capacity_per_hour);
+        });
+    });
+  });
+
+  describe("PATCH /api/operating-hours-override/:id", () => {
+    test("200: Updates an override record", () => {
+      const updatedData = { reason: "Updated reason" };
+      return request(app)
+        .patch("/api/operating-hours-override/1")
+        .send(updatedData)
+        .expect(200)
+        .then(({ body: { override } }) => {
+          expect(override.reason).toBe(updatedData.reason);
+        });
+    });
+    test("404: Returns error if override not found", () => {
+      return request(app)
+        .patch("/api/operating-hours-override/9999")
+        .send({ reason: "Nope" })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Override not found");
+        });
+    });
+  });
+
+  describe("DELETE /api/operating-hours-override/:id", () => {
+    test("200: Deletes an override record", () => {
+      return request(app)
+        .delete("/api/operating-hours-override/1")
+        .expect(200)
+        .then(({ body: { override } }) => {
+          expect(override).toHaveProperty("id", 1);
+        });
+    });
+    test("404: Returns error if override not found", () => {
+      return request(app)
+        .delete("/api/operating-hours-override/9999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Override not found");
+        });
+    });
+  });
+
+  describe("GET /api/branches/:branch_id/operating-hours-override/:date", () => {
+    test("200: returns overrides for branch 1 on 2025-08-02", () => {
+      return request(app)
+        .get("/api/branches/1/operating-hours-override/2025-08-02")
+        .expect(200)
+        .then(({ body: { overrides } }) => {
+          expect(Array.isArray(overrides)).toBe(true);
+          expect(overrides.length).toBe(1);
+          const ov = overrides[0];
+          expect(ov.branch_id).toBe(1);
+          expect(ov.date).toBe("2025-08-02");
+          expect(ov.is_closed).toBe(true);
+          expect(ov).toHaveProperty("capacity_per_hour");
+        });
+    });
+    test("200: returns empty array for no overrides", () => {
+      return request(app)
+        .get("/api/branches/1/operating-hours-override/2099-01-01")
+        .expect(200)
+        .then(({ body: { overrides } }) => {
+          expect(Array.isArray(overrides)).toBe(true);
+          expect(overrides).toHaveLength(0);
+        });
+    });
+  });
+});
 // --------------------
 // Booking Types Endpoints
 // --------------------

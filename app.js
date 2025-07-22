@@ -13,6 +13,7 @@ const garageChainsController = require('./controllers/garageChains-controller');
 const branchesController = require('./controllers/branches-controller');
 const usersController = require('./controllers/users-controller');
 const operatingHoursController = require('./controllers/operatingHours-controller');
+const operatingHoursOverrideController = require('./controllers/operatingHoursOverride-controller');
 const bookingTypesController = require('./controllers/bookingTypes-controller');
 const bookingsController = require('./controllers/bookings-controller');
 const authController = require('./controllers/auth-controller');
@@ -60,7 +61,19 @@ app.get('/api/operating-hours/branch/:branch_id', operatingHoursController.getOp
 app.get('/api/operating-hours/:id', operatingHoursController.getOperatingHourById);
 app.post('/api/operating-hours', operatingHoursController.postOperatingHour);
 app.patch('/api/operating-hours/:id', operatingHoursController.patchOperatingHour);
+
 app.delete('/api/operating-hours/:id', operatingHoursController.deleteOperatingHour);
+
+// Operating Hours Override endpoints
+app.get('/api/operating-hours-override', operatingHoursOverrideController.getAllOverrides);
+app.post('/api/operating-hours-override', operatingHoursOverrideController.postOverride);
+app.get('/api/operating-hours-override/:id', operatingHoursOverrideController.getOverrideById);
+app.patch('/api/operating-hours-override/:id', operatingHoursOverrideController.patchOverride);
+app.delete('/api/operating-hours-override/:id', operatingHoursOverrideController.deleteOverride);
+app.get(
+  '/api/branches/:branch_id/operating-hours-override/:date',
+  operatingHoursOverrideController.getOverridesByBranchDate
+);
 
 // Booking Types endpoints
 app.get('/api/booking-types', bookingTypesController.getBookingTypes);
