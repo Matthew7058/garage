@@ -832,6 +832,226 @@ describe("Booking Blocks Endpoints", () => {
   });
 });
 // --------------------
+// Invoice Presets Endpoints
+// --------------------
+describe("Invoice Presets Endpoints", () => {
+  describe("GET /api/invoice-presets", () => {
+    test("200: responds with an array of presets (each with items array)", () => {
+      return request(app)
+        .get("/api/invoice-presets")
+        .expect(200)
+        .then(({ body: { presets } }) => {
+          expect(Array.isArray(presets)).toBe(true);
+          if (presets.length) {
+            const p = presets[0];
+            expect(p).toHaveProperty("id");
+            expect(p).toHaveProperty("branch_id");
+            expect(p).toHaveProperty("name");
+            expect(p).toHaveProperty("active");
+            expect(Array.isArray(p.items)).toBe(true);
+          }
+        });
+    });
+  });
+
+  describe("POST /api/invoice-presets", () => {
+    test("201: creates a preset with its items", () => {
+      const payload = {
+        branch_id: 1,
+        name: "Spark Plug Change",
+        category: "Engine",
+        items: [
+          { type: "labour", description: "Labour", quantity_default: 1.5, price: 60.0, vat_applies: true },
+          { type: "part", description: "Spark Plug", quantity_default: 4, price: 3.25, vat_applies: true }
+        ]
+      };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(payload)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          expect(preset).toHaveProperty("id");
+          expect(preset.name).toBe(payload.name);
+          expect(preset.branch_id).toBe(payload.branch_id);
+          expect(Array.isArray(preset.items)).toBe(true);
+          expect(preset.items.length).toBe(2);
+          const item = preset.items[0];
+          expect(item).toHaveProperty("id");
+          expect(item).toHaveProperty("preset_id", preset.id);
+          expect(item).toHaveProperty("price");
+        });
+    });
+  });
+
+  describe("PATCH /api/invoice-presets/:id", () => {
+    test("200: updates preset fields (name/active)", () => {
+      const create = {
+        branch_id: 1,
+        name: "Air Filter Swap",
+        category: "Service",
+        items: []
+      };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(create)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          const patchData = { name: "Air Filter Replacement", active: false };
+          return request(app)
+            .patch(`/api/invoice-presets/${preset.id}`)
+            .send(patchData)
+            .expect(200)
+            .then(({ body: { preset: updated } }) => {
+              expect(updated.name).toBe(patchData.name);
+              expect(updated.active).toBe(patchData.active);
+            });
+        });
+    });
+
+    test("404: returns error when preset id not found", () => {
+      return request(app)
+        .patch("/api/invoice-presets/999999")
+        .send({ name: "Nope" })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/preset not found/i);
+        });
+    });
+  });
+
+  describe("DELETE /api/invoice-presets/:id", () => {
+    test("200: deletes a preset", () => {
+      const make = { branch_id: 1, name: "Temp Preset", items: [] };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(make)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          return request(app)
+            .delete(`/api/invoice-presets/${preset.id}`)
+            .expect(200)
+            .then(({ body: { preset: deleted } }) => {
+              expect(deleted).toHaveProperty("id", preset.id);
+            });
+        });
+    });
+
+    test("404: returns error if preset not found", () => {
+      return request(app)
+        .delete("/api/invoice-presets/999999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/preset not found/i);
+        });
+    });
+  });
+
+  describe("POST /api/invoice-presets/:id/items", () => {
+    test("201: adds an item to an existing preset", () => {
+      const base = { branch_id: 1, name: "Brake Service", items: [] };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(base)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          const newItem = { type: "part", description: "Brake Fluid", quantity_default: 1, price: 12.5, vat_applies: true };
+          return request(app)
+            .post(`/api/invoice-presets/${preset.id}/items`)
+            .send(newItem)
+            .expect(201)
+            .then(({ body: { item } }) => {
+              expect(item).toHaveProperty("id");
+              expect(item).toHaveProperty("preset_id", preset.id);
+              expect(item.description).toBe(newItem.description);
+            });
+        });
+    });
+
+    test("404: error when adding item to unknown preset", () => {
+      const newItem = { type: "part", description: "Ghost Part", quantity_default: 1, price: 1.0, vat_applies: true };
+      return request(app)
+        .post("/api/invoice-presets/999999/items")
+        .send(newItem)
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/preset not found/i);
+        });
+    });
+  });
+
+  describe("PATCH /api/invoice-presets/items/:itemId", () => {
+    test("200: edits an item", () => {
+      const base = { branch_id: 1, name: "AC Service", items: [] };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(base)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          const itemPayload = { type: "labour", description: "AC Labour", quantity_default: 1, price: 50, vat_applies: true };
+          return request(app)
+            .post(`/api/invoice-presets/${preset.id}/items`)
+            .send(itemPayload)
+            .expect(201)
+            .then(({ body: { item } }) => {
+              const patch = { price: 65.25, description: "AC System Labour" };
+              return request(app)
+                .patch(`/api/invoice-presets/items/${item.id}`)
+                .send(patch)
+                .expect(200)
+                .then(({ body: { item: updated } }) => {
+                  expect(Number(updated.price)).toBe(patch.price);
+                  expect(updated.description).toBe(patch.description);
+                });
+            });
+        });
+    });
+
+    test("404: error when item not found", () => {
+      return request(app)
+        .patch("/api/invoice-presets/items/999999")
+        .send({ price: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/item not found/i);
+        });
+    });
+  });
+
+  describe("DELETE /api/invoice-presets/items/:itemId", () => {
+    test("200: deletes an item", () => {
+      const base = { branch_id: 1, name: "Tyre Change", items: [] };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(base)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          const itemPayload = { type: "part", description: "Valve", quantity_default: 4, price: 1.5, vat_applies: true };
+          return request(app)
+            .post(`/api/invoice-presets/${preset.id}/items`)
+            .send(itemPayload)
+            .expect(201)
+            .then(({ body: { item } }) => {
+              return request(app)
+                .delete(`/api/invoice-presets/items/${item.id}`)
+                .expect(200)
+                .then(({ body: { item: deleted } }) => {
+                  expect(deleted).toHaveProperty("id", item.id);
+                });
+            });
+        });
+    });
+
+    test("404: error when deleting unknown item", () => {
+      return request(app)
+        .delete("/api/invoice-presets/items/999999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/item not found/i);
+        });
+    });
+  });
+});
+// --------------------
 // Booking Types Endpoints
 // --------------------
 describe("Booking Types Endpoints", () => {

@@ -17,6 +17,7 @@ const operatingHoursOverrideController = require('./controllers/operatingHoursOv
 const bookingTypesController = require('./controllers/bookingTypes-controller');
 const bookingsController = require('./controllers/bookings-controller');
 const bookingBlocksController = require('./controllers/bookingBlocks-controller');
+const invoicePresetsController = require('./controllers/invoicePresets-controller');
 const authController = require('./controllers/auth-controller');
 const { getMotHistory } = require('./controllers/motHistory-controller');
 const confirmationEmailRouter = require('./controllers/resend-controller');
@@ -103,6 +104,18 @@ app.get('/api/booking-blocks/:id', bookingBlocksController.getBlockById);
 app.post('/api/booking-blocks', bookingBlocksController.postBlock);
 app.patch('/api/booking-blocks/:id', bookingBlocksController.patchBlock);
 app.delete('/api/booking-blocks/:id', bookingBlocksController.deleteBlock);
+
+// Invoice Presets endpoints
+// Presets
+app.get('/api/invoice-presets',                 invoicePresetsController.getInvoicePresets);
+app.post('/api/invoice-presets',                invoicePresetsController.postInvoicePreset);
+app.patch('/api/invoice-presets/:id',           invoicePresetsController.patchInvoicePreset);
+app.delete('/api/invoice-presets/:id',          invoicePresetsController.deleteInvoicePreset);
+
+// Preset Items
+app.post('/api/invoice-presets/:id/items',      invoicePresetsController.postInvoicePresetItem);
+app.patch('/api/invoice-presets/items/:item_id',invoicePresetsController.patchInvoicePresetItem);
+app.delete('/api/invoice-presets/items/:item_id',invoicePresetsController.deleteInvoicePresetItem);
 
 // 404 error for any undefined route
 app.all('*', (req, res) => {
