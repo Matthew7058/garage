@@ -16,6 +16,7 @@ const operatingHoursController = require('./controllers/operatingHours-controlle
 const operatingHoursOverrideController = require('./controllers/operatingHoursOverride-controller');
 const bookingTypesController = require('./controllers/bookingTypes-controller');
 const bookingsController = require('./controllers/bookings-controller');
+const bookingBlocksController = require('./controllers/bookingBlocks-controller');
 const authController = require('./controllers/auth-controller');
 const { getMotHistory } = require('./controllers/motHistory-controller');
 const confirmationEmailRouter = require('./controllers/resend-controller');
@@ -93,6 +94,15 @@ app.patch('/api/bookings/:id', bookingsController.patchBooking);
 app.delete('/api/bookings/:id', bookingsController.deleteBooking);
 app.get('/api/bookings/user/email/:email', bookingsController.getBookingsByUserEmail);
 app.get('/api/bookings/user/search/:name', bookingsController.searchBookingsByUserName);
+
+// Booking Blocks endpoints
+// (order matters: put specific routes before the generic :id)
+app.get('/api/booking-blocks/branch/:branch_id/date/:date', bookingBlocksController.getBlocksByBranchAndDate);
+app.get('/api/booking-blocks', bookingBlocksController.getAllBlocks);
+app.get('/api/booking-blocks/:id', bookingBlocksController.getBlockById);
+app.post('/api/booking-blocks', bookingBlocksController.postBlock);
+app.patch('/api/booking-blocks/:id', bookingBlocksController.patchBlock);
+app.delete('/api/booking-blocks/:id', bookingBlocksController.deleteBlock);
 
 // 404 error for any undefined route
 app.all('*', (req, res) => {

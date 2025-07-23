@@ -6,11 +6,11 @@ const app = require('../app');
 const request = require('supertest');
 const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
-const { chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData } = require("../db/data/test-data/index");
+const { chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData } = require("../db/data/test-data/index");
 
 /* Set up your beforeEach & afterAll functions here */
 
-beforeEach(() => seed({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData }));
+beforeEach(() => seed({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData }));
 afterAll(() => db.end());
 
 describe("GET /api", () => {
@@ -671,6 +671,162 @@ describe("Operating Hours Override Endpoints", () => {
         .then(({ body: { overrides } }) => {
           expect(Array.isArray(overrides)).toBe(true);
           expect(overrides).toHaveLength(0);
+        });
+    });
+  });
+});
+// --------------------
+// --------------------
+// Booking Blocks Endpoints
+// --------------------
+describe("Booking Blocks Endpoints", () => {
+  describe("GET /api/booking-blocks", () => {
+    test("200: responds with all booking blocks", () => {
+      return request(app)
+        .get("/api/booking-blocks")
+        .expect(200)
+        .then(({ body: { blocks } }) => {
+          expect(Array.isArray(blocks)).toBe(true);
+          expect(blocks.length).toBeGreaterThan(0);
+          blocks.forEach((b) => {
+            expect(b).toHaveProperty("id");
+            expect(b).toHaveProperty("branch_id");
+            expect(b).toHaveProperty("date");
+            expect(b).toHaveProperty("start_time");
+            expect(b).toHaveProperty("end_time");
+            expect(b).toHaveProperty("capacity_per_hour");
+          });
+        });
+    });
+  });
+
+  describe("GET /api/booking-blocks/:id", () => {
+    test("200: responds with a single block", () => {
+      return request(app)
+        .get("/api/booking-blocks")
+        .then(({ body: { blocks } }) => {
+          const id = blocks[0].id;
+          return request(app)
+            .get(`/api/booking-blocks/${id}`)
+            .expect(200)
+            .then(({ body: { block } }) => {
+              expect(block).toHaveProperty("id", id);
+            });
+        });
+    });
+
+    test("404: responds with error if block not found", () => {
+      return request(app)
+        .get("/api/booking-blocks/999999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/block not found/i);
+        });
+    });
+  });
+
+  describe("POST /api/booking-blocks", () => {
+    test("201: creates a new block", () => {
+      const newBlock = {
+        branch_id: 1,
+        date: "2025-10-10",
+        start_time: "10:00",
+        end_time: "12:00",
+        capacity_per_hour: 0,
+        reason: "Doctor appt"
+      };
+      return request(app)
+        .post("/api/booking-blocks")
+        .send(newBlock)
+        .expect(201)
+        .then(({ body: { block } }) => {
+          expect(block).toHaveProperty("id");
+          expect(block.branch_id).toBe(newBlock.branch_id);
+          expect(block.date).toBe(newBlock.date);
+          expect(block.start_time).toBe(newBlock.start_time);
+          expect(block.end_time).toBe(newBlock.end_time);
+          expect(block.capacity_per_hour).toBe(newBlock.capacity_per_hour);
+          expect(block.reason).toBe(newBlock.reason);
+        });
+    });
+  });
+
+  describe("PATCH /api/booking-blocks/:id", () => {
+    test("200: updates a block", () => {
+      const patchData = { capacity_per_hour: 5, reason: "Extra tester in" };
+      return request(app)
+        .get("/api/booking-blocks")
+        .then(({ body: { blocks } }) => {
+          const id = blocks[0].id;
+          return request(app)
+            .patch(`/api/booking-blocks/${id}`)
+            .send(patchData)
+            .expect(200)
+            .then(({ body: { block } }) => {
+              expect(block.capacity_per_hour).toBe(patchData.capacity_per_hour);
+              expect(block.reason).toBe(patchData.reason);
+            });
+        });
+    });
+
+    test("404: returns error if block not found", () => {
+      return request(app)
+        .patch("/api/booking-blocks/999999")
+        .send({ capacity_per_hour: 0 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/block not found/i);
+        });
+    });
+  });
+
+  describe("DELETE /api/booking-blocks/:id", () => {
+    test("200: deletes a block", () => {
+      return request(app)
+        .get("/api/booking-blocks")
+        .then(({ body: { blocks } }) => {
+          const id = blocks[0].id;
+          return request(app)
+            .delete(`/api/booking-blocks/${id}`)
+            .expect(200)
+            .then(({ body: { block } }) => {
+              expect(block).toHaveProperty("id", id);
+            });
+        });
+    });
+
+    test("404: returns error if block not found", () => {
+      return request(app)
+        .delete("/api/booking-blocks/999999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/block not found/i);
+        });
+    });
+  });
+
+  describe("GET /api/booking-blocks/branch/:branch_id/date/:date", () => {
+    test("200: responds with blocks for branch and date", () => {
+      const sample = blocksData[0];
+      return request(app)
+        .get(`/api/booking-blocks/branch/${sample.branch_id}/date/${sample.date}`)
+        .expect(200)
+        .then(({ body: { blocks } }) => {
+          expect(Array.isArray(blocks)).toBe(true);
+          blocks.forEach((b) => {
+            expect(b.branch_id).toBe(sample.branch_id);
+            expect(b.date).toBe(sample.date);
+          });
+        });
+    });
+
+    test("200: empty array when no blocks for that date", () => {
+      return request(app)
+        .get("/api/booking-blocks/branch/1/date/2099-01-01")
+        .expect(200)
+        .then(({ body: { blocks } }) => {
+          expect(Array.isArray(blocks)).toBe(true);
+          expect(blocks).toHaveLength(0);
         });
     });
   });

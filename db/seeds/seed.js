@@ -1,9 +1,10 @@
 const format = require('pg-format');
 const db = require('../connection');
 
-const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData }) => {
+const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData }) => {
     // Drop tables in order (most dependent first)
     return db.query(`DROP TABLE IF EXISTS bookings;`)
+      .then(() => db.query(`DROP TABLE IF EXISTS booking_blocks;`))
       .then(() => db.query(`DROP TABLE IF EXISTS booking_types;`))
       .then(() => db.query('DROP TABLE IF EXISTS operating_hours_override;'))
       .then(() => db.query(`DROP TABLE IF EXISTS operating_hours;`))
@@ -91,6 +92,21 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       })
       .then(() => {
         return db.query(`
+          CREATE TABLE booking_blocks (
+            id SERIAL PRIMARY KEY,
+            branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
+            date DATE NOT NULL,
+            start_time TIME NOT NULL,
+            end_time TIME NOT NULL,
+            capacity_per_hour INTEGER,
+            reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+      })
+      .then(() => {
+        return db.query(`
           CREATE TABLE booking_types (
             id SERIAL PRIMARY KEY,
             branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
@@ -173,6 +189,22 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
           ])
         );
         return db.query(insertOverridesQuery);
+      })
+      // Insert data into booking_blocks
+      .then(() => {
+        if (!blocksData || !blocksData.length) return Promise.resolve();
+        const insertBlocksQuery = format(
+          `INSERT INTO booking_blocks (branch_id, date, start_time, end_time, capacity_per_hour, reason) VALUES %L RETURNING *;`,
+          blocksData.map(({ branch_id, date, start_time, end_time, capacity_per_hour, reason }) => [
+            branch_id,
+            date,
+            start_time,
+            end_time,
+            capacity_per_hour,
+            reason
+          ])
+        );
+        return db.query(insertBlocksQuery);
       })
       // Insert data into booking_types
       .then(() => {

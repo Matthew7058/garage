@@ -5,3 +5,4 @@ exports.chainsData = require('./garage-chains.js');
 exports.hoursData = require('./hours.js');
 exports.usersData = require('./users.js');
 exports.overridesData = require('./hoursOverride.js');
+exports.blocksData = require('./booking-blocks.js');
