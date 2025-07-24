@@ -108,6 +108,7 @@ app.delete('/api/booking-blocks/:id', bookingBlocksController.deleteBlock);
 // Invoice Presets endpoints
 // Presets
 app.get('/api/invoice-presets',                 invoicePresetsController.getInvoicePresets);
+app.get('/api/invoice-presets/:id',                 invoicePresetsController.getInvoicePresetById);
 app.post('/api/invoice-presets',                invoicePresetsController.postInvoicePreset);
 app.patch('/api/invoice-presets/:id',           invoicePresetsController.patchInvoicePreset);
 app.delete('/api/invoice-presets/:id',          invoicePresetsController.deleteInvoicePreset);

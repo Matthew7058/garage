@@ -6,3 +6,5 @@ exports.hoursData = require('./hours.js');
 exports.usersData = require('./users.js');
 exports.overridesData = require('./hoursOverride.js');
 exports.blocksData = require('./booking-blocks.js');
+exports.presetsData = require('./invoice-presets.js');
+exports.presetItemsData = require('./invoice-preset-items.js');

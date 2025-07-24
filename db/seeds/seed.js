@@ -111,7 +111,7 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
         return db.query(`
           CREATE TABLE invoice_presets (
             id SERIAL PRIMARY KEY,
-            branch_id INTEGER REFERENCES garage_chains(id) ON DELETE CASCADE,
+            branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
             name TEXT NOT NULL,
             category TEXT,
             active BOOLEAN DEFAULT TRUE,
