@@ -6,7 +6,8 @@ const {
   removePreset,
   insertPresetItem,
   updatePresetItem,
-  removePresetItem
+  removePresetItem,
+  fetchPresetsByBranch
 } = require('../models/invoicePresets-model');
 
 /**
@@ -29,6 +30,26 @@ exports.getInvoicePresets = (req, res, next) => {
 exports.getInvoicePresetById = (req, res, next) => {
   fetchPresetById(req.params.id)
     .then(preset => res.status(200).send({ preset }))
+    .catch(next);
+};
+
+/**
+ * GET /api/invoice-presets/branch/:branch_id
+ * Optional query param: includeInactive=false
+ */
+exports.getInvoicePresetsByBranch = (req, res, next) => {
+  const { branch_id } = req.params;
+  const { includeInactive } = req.query;
+
+  if (!branch_id) {
+    return res.status(400).send({ msg: 'branch_id is required' });
+  }
+
+  fetchPresetsByBranch(
+    Number(branch_id),
+    includeInactive !== 'false' // default true
+  )
+    .then((presets) => res.status(200).send({ presets }))
     .catch(next);
 };
 

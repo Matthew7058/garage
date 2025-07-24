@@ -6,11 +6,11 @@ const app = require('../app');
 const request = require('supertest');
 const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
-const { chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData } = require("../db/data/test-data/index");
+const { chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData, presetsData, presetItemsData } = require("../db/data/test-data/index");
 
 /* Set up your beforeEach & afterAll functions here */
 
-beforeEach(() => seed({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData }));
+beforeEach(() => seed({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData, presetsData, presetItemsData }));
 afterAll(() => db.end());
 
 describe("GET /api", () => {
@@ -1051,6 +1051,33 @@ describe("Invoice Presets Endpoints", () => {
     });
   });
 });
+  // 2. Presets by branch
+  describe("GET /api/invoice-presets/branch/:branch_id", () => {
+    test("200: returns all presets for branch 1", () => {
+      return request(app)
+        .get("/api/invoice-presets/branch/1")
+        .expect(200)
+        .then(({ body: { presets } }) => {
+          expect(Array.isArray(presets)).toBe(true);
+          expect(presets.length).toBeGreaterThan(0);
+          presets.forEach((p) => {
+            expect(p).toHaveProperty("branch_id", 1);
+            expect(p).toHaveProperty("name");
+            expect(Array.isArray(p.items)).toBe(true);
+          });
+        });
+    });
+
+    test("200: empty array when branch has no presets (e.g. 999)", () => {
+      return request(app)
+        .get("/api/invoice-presets/branch/999")
+        .expect(200)
+        .then(({ body: { presets } }) => {
+          expect(Array.isArray(presets)).toBe(true);
+          expect(presets).toHaveLength(0);
+        });
+    });
+  });
 // --------------------
 // Booking Types Endpoints
 // --------------------

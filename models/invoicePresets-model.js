@@ -61,6 +61,18 @@ exports.fetchAllPresets = ({ branch_id, includeInactive = true } = {}) => {
   return db.query(sql, params).then(res => groupPresetRows(res.rows));
 };
 
+/**
+ * Fetch all presets belonging to a single branch.
+ * @param {number} branch_id – the branch’s id
+ * @param {Object} [opts]    – options (currently only includeInactive)
+ * @param {boolean} [opts.includeInactive=true] – include inactive presets?
+ * @returns {Promise<Array>} – array of grouped preset objects
+ */
+exports.fetchPresetsByBranch = (branch_id, { includeInactive = true } = {}) => {
+  if (!branch_id) return Promise.reject({ status: 400, msg: 'branch_id is required' });
+  return exports.fetchAllPresets({ branch_id, includeInactive });
+};
+
 exports.fetchPresetById = (id) => {
   const sql = `
     SELECT

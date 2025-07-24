@@ -1,7 +1,7 @@
 const format = require('pg-format');
 const db = require('../connection');
 
-const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData, invoicePresetsData, invoicePresetItemsData }) => {
+const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData, presetsData, presetItemsData }) => {
     // Drop tables in order (most dependent first)
     return db.query(`DROP TABLE IF EXISTS bookings;`)
       .then(() => db.query(`DROP TABLE IF EXISTS booking_blocks;`))
@@ -244,18 +244,18 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
         return db.query(insertBookingTypesQuery);
       })
       .then(() => {
-        if (!invoicePresetsData || !invoicePresetsData.length) return Promise.resolve();
+        if (!presetsData || !presetsData.length) return Promise.resolve();
         const insertPresetsQuery = format(
           `INSERT INTO invoice_presets (branch_id, name, category, active) VALUES %L RETURNING *;`,
-          invoicePresetsData.map(({ branch_id, name, category = null, active = true }) => [branch_id, name, category, active])
+          presetsData.map(({ branch_id, name, category = null, active = true }) => [branch_id, name, category, active])
         );
         return db.query(insertPresetsQuery);
       })
       .then(() => {
-        if (!invoicePresetItemsData || !invoicePresetItemsData.length) return Promise.resolve();
+        if (!presetItemsData || !presetItemsData.length) return Promise.resolve();
         const insertItemsQuery = format(
           `INSERT INTO invoice_preset_items (preset_id, type, description, quantity, price, vat_applies, quantity_default) VALUES %L RETURNING *;`,
-          invoicePresetItemsData.map(({ preset_id, type = null, description = '', quantity = null, price = 0, vat_applies = true, quantity_default = 1 }) => [preset_id, type, description, quantity, price, vat_applies, quantity_default])
+          presetItemsData.map(({ preset_id, type = null, description = '', quantity = null, price = 0, vat_applies = true, quantity_default = 1 }) => [preset_id, type, description, quantity, price, vat_applies, quantity_default])
         );
         return db.query(insertItemsQuery);
       })
