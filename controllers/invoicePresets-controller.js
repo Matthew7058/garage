@@ -7,7 +7,8 @@ const {
   insertPresetItem,
   updatePresetItem,
   removePresetItem,
-  fetchPresetsByBranch
+  fetchPresetsByBranch,
+  fetchJobSheetByBookingId,
 } = require('../models/invoicePresets-model');
 
 /**
@@ -56,6 +57,7 @@ exports.getInvoicePresetsByBranch = (req, res, next) => {
 /**
  * POST /api/invoice-presets
  * Body: { branch_id, name, category?, active?, items?: [ ... ] }
+ * (The body may now include: vin, mileage, technician, booking_id)
  */
 exports.postInvoicePreset = (req, res, next) => {
   insertPreset(req.body)
@@ -66,6 +68,7 @@ exports.postInvoicePreset = (req, res, next) => {
 /**
  * PATCH /api/invoice-presets/:id
  * Body: { branch_id?, name?, category?, active? }
+ * (The body may now include: vin, mileage, technician, booking_id)
  */
 exports.patchInvoicePreset = (req, res, next) => {
   updatePreset(req.params.id, req.body)
@@ -110,3 +113,71 @@ exports.deleteInvoicePresetItem = (req, res, next) => {
     .then(item => res.status(200).send({ item }))
     .catch(next);
 };
+
+// --- job‑sheet response helpers ---
+function sendJobSheetArray(res, arr, status = 200) {
+  res.status(status).send({ job_sheets: arr });
+}
+function sendJobSheetSingle(res, sheet, status = 200) {
+  res.status(status).send({ job_sheet: sheet });
+}
+
+
+/** ---------------- Job‑Sheets (category = 'jobsheet') -------------- */
+
+// GET /api/job-sheets            -> list all job‑sheets (optional branch_id, includeInactive)
+exports.getJobSheets = (req, res, next) => {
+  const { branch_id, includeInactive } = req.query;
+  fetchAllPresets({
+    branch_id: branch_id ? Number(branch_id) : undefined,
+    includeInactive: includeInactive !== 'false'
+  })
+    .then(presets => {
+      const jobSheets = presets.filter(
+        p => (p.category || '').toLowerCase() === 'jobsheet'
+      );
+      sendJobSheetArray(res, jobSheets);
+    })
+    .catch(next);
+};
+
+// GET /api/job-sheets/:id
+exports.getJobSheetById = (req, res, next) => {
+  fetchPresetById(req.params.id)
+    .then(preset => sendJobSheetSingle(res, preset))
+    .catch(next);
+};
+
+// GET /api/job-sheets/booking/:booking_id
+exports.getJobSheetByBookingId = (req, res, next) => {
+  const { booking_id } = req.params;
+  fetchJobSheetByBookingId(booking_id)
+    .then(preset => sendJobSheetSingle(res, preset))
+    .catch(next);
+};
+
+// POST /api/job-sheets
+exports.postJobSheet = (req, res, next) => {
+  insertPreset(req.body)
+    .then(preset => sendJobSheetSingle(res, preset, 201))
+    .catch(next);
+};
+
+// PATCH /api/job-sheets/:id
+exports.patchJobSheet = (req, res, next) => {
+  updatePreset(req.params.id, req.body)
+    .then(updated => sendJobSheetSingle(res, updated))
+    .catch(next);
+};
+
+// DELETE /api/job-sheets/:id
+exports.deleteJobSheet = (req, res, next) => {
+  removePreset(req.params.id)
+    .then(deleted => sendJobSheetSingle(res, deleted))
+    .catch(next);
+};
+
+// Items – reuse existing handlers   (/api/job-sheets/:id/items etc.)
+exports.postJobSheetItem   = exports.postInvoicePresetItem;
+exports.patchJobSheetItem  = exports.patchInvoicePresetItem;
+exports.deleteJobSheetItem = exports.deleteInvoicePresetItem;

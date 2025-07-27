@@ -2,17 +2,17 @@ const format = require('pg-format');
 const db = require('../connection');
 
 const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData, presetsData, presetItemsData }) => {
-    // Drop tables in order (most dependent first)
-    return db.query(`DROP TABLE IF EXISTS bookings;`)
-      .then(() => db.query(`DROP TABLE IF EXISTS booking_blocks;`))
-      .then(() => db.query(`DROP TABLE IF EXISTS booking_types;`))
-      .then(() => db.query('DROP TABLE IF EXISTS invoice_preset_items;'))
+    // Drop tables in dependency order (children first)
+    return db.query('DROP TABLE IF EXISTS invoice_preset_items;')
       .then(() => db.query('DROP TABLE IF EXISTS invoice_presets;'))
+      .then(() => db.query('DROP TABLE IF EXISTS bookings;'))
+      .then(() => db.query('DROP TABLE IF EXISTS booking_blocks;'))
+      .then(() => db.query('DROP TABLE IF EXISTS booking_types;'))
       .then(() => db.query('DROP TABLE IF EXISTS operating_hours_override;'))
-      .then(() => db.query(`DROP TABLE IF EXISTS operating_hours;`))
-      .then(() => db.query(`DROP TABLE IF EXISTS users;`))
-      .then(() => db.query(`DROP TABLE IF EXISTS branches;`))
-      .then(() => db.query(`DROP TABLE IF EXISTS garage_chains;`))
+      .then(() => db.query('DROP TABLE IF EXISTS operating_hours;'))
+      .then(() => db.query('DROP TABLE IF EXISTS users;'))
+      .then(() => db.query('DROP TABLE IF EXISTS branches;'))
+      .then(() => db.query('DROP TABLE IF EXISTS garage_chains;'))
       // Create tables sequentially
       .then(() => {
         return db.query(`
@@ -109,37 +109,10 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       })
       .then(() => {
         return db.query(`
-          CREATE TABLE invoice_presets (
-            id SERIAL PRIMARY KEY,
-            branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
-            name TEXT NOT NULL,
-            category TEXT,
-            active BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          );
-        `);
-      })
-      .then(() => {
-        return db.query(`
-          CREATE TABLE invoice_preset_items (
-            id SERIAL PRIMARY KEY,
-            preset_id INTEGER REFERENCES invoice_presets(id) ON DELETE CASCADE,
-            type TEXT,
-            description TEXT,
-            quantity INTEGER,
-            price NUMERIC(10,2) NOT NULL DEFAULT 0,
-            vat_applies BOOLEAN DEFAULT TRUE,
-            quantity_default NUMERIC(6,2) NOT NULL DEFAULT 1
-          );
-        `);
-      })
-      .then(() => {
-        return db.query(`
           CREATE TABLE booking_types (
             id SERIAL PRIMARY KEY,
             branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
-            name VARCHAR(50) UNIQUE NOT NULL,
+            name VARCHAR(50) NOT NULL,
             price NUMERIC(10, 2),
             length INTEGER
           );
@@ -159,6 +132,37 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             comments TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+      })
+      .then(() => {
+        return db.query(`
+          CREATE TABLE invoice_presets (
+            id SERIAL PRIMARY KEY,
+            branch_id   INTEGER REFERENCES branches(id) ON DELETE CASCADE,
+            booking_id  INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
+            name        TEXT NOT NULL,
+            category    TEXT,
+            vin         TEXT,
+            mileage     INTEGER,
+            technician  TEXT,
+            active      BOOLEAN DEFAULT TRUE,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+      })
+      .then(() => {
+        return db.query(`
+          CREATE TABLE invoice_preset_items (
+            id SERIAL PRIMARY KEY,
+            preset_id        INTEGER REFERENCES invoice_presets(id) ON DELETE CASCADE,
+            type             TEXT,
+            description      TEXT,
+            quantity         INTEGER,
+            price            NUMERIC(10,2) NOT NULL DEFAULT 0,
+            vat_applies      BOOLEAN DEFAULT TRUE,
+            quantity_default NUMERIC(6,2) NOT NULL DEFAULT 1
           );
         `);
       })
@@ -246,8 +250,10 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       .then(() => {
         if (!presetsData || !presetsData.length) return Promise.resolve();
         const insertPresetsQuery = format(
-          `INSERT INTO invoice_presets (branch_id, name, category, active) VALUES %L RETURNING *;`,
-          presetsData.map(({ branch_id, name, category = null, active = true }) => [branch_id, name, category, active])
+          `INSERT INTO invoice_presets (branch_id, name, category, active, vin, mileage, technician, booking_id) VALUES %L RETURNING *;`,
+          presetsData.map(({ branch_id, name, category = null, active = true, vin = null, mileage = null, technician = null, booking_id = null }) =>
+            [branch_id, name, category, active, vin, mileage, technician, booking_id]
+          )
         );
         return db.query(insertPresetsQuery);
       })

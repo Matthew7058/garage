@@ -13,6 +13,10 @@ function groupPresetRows(rows) {
         name: r.name,
         category: r.category,
         active: r.active,
+        vin:         r.vin,
+        mileage:     r.mileage,
+        technician:  r.technician,
+        booking_id:  r.booking_id,
         created_at: r.created_at,
         items: []
       });
@@ -51,7 +55,7 @@ exports.fetchAllPresets = ({ branch_id, includeInactive = true } = {}) => {
 
   const sql = `
     SELECT
-      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.created_at,
+      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.vin, p.mileage, p.technician, p.booking_id, p.created_at,
       i.id AS item_id, i.type, i.description, i.quantity, i.price, i.vat_applies, i.quantity_default
     FROM invoice_presets p
     LEFT JOIN invoice_preset_items i ON i.preset_id = p.id
@@ -76,7 +80,7 @@ exports.fetchPresetsByBranch = (branch_id, { includeInactive = true } = {}) => {
 exports.fetchPresetById = (id) => {
   const sql = `
     SELECT
-      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.created_at,
+      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.vin, p.mileage, p.technician, p.booking_id, p.created_at,
       i.id AS item_id, i.type, i.description, i.quantity, i.price, i.vat_applies, i.quantity_default
     FROM invoice_presets p
     LEFT JOIN invoice_preset_items i ON i.preset_id = p.id
@@ -89,14 +93,42 @@ exports.fetchPresetById = (id) => {
   });
 };
 
-exports.insertPreset = async ({ branch_id, name, category = null, active = true, items = [] }) => {
+/**
+ * Fetch a single Job‑Sheet by its booking_id.
+ * There should be at most one job‑sheet per booking.
+ * Returns the grouped preset object or a 404.
+ * @param {number} booking_id
+ */
+exports.fetchJobSheetByBookingId = (booking_id) => {
+  const sql = `
+    SELECT
+      p.id AS preset_id, p.branch_id, p.name, p.category, p.active,
+      p.vin, p.mileage, p.technician, p.booking_id, p.created_at,
+      i.id AS item_id, i.type, i.description, i.quantity, i.price,
+      i.vat_applies, i.quantity_default
+    FROM invoice_presets p
+    LEFT JOIN invoice_preset_items i ON i.preset_id = p.id
+    WHERE p.booking_id = $1
+    ORDER BY i.id;
+  `;
+  return db.query(sql, [booking_id]).then(res => {
+    if (!res.rows.length) {
+      return Promise.reject({ status: 404, msg: 'Job sheet not found' });
+    }
+    return groupPresetRows(res.rows)[0];
+  });
+};
+
+exports.insertPreset = async ({ branch_id, name, category = null, active = true,
+                                vin = null, mileage = null, technician = null,
+                                booking_id = null, items = [] }) => {
   await db.query('BEGIN');
   try {
     const presetRes = await db.query(
-      `INSERT INTO invoice_presets (branch_id, name, category, active)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO invoice_presets (branch_id, name, category, active, vin, mileage, technician, booking_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *;`,
-      [branch_id, name, category, active]
+      [branch_id, name, category, active, vin, mileage, technician, booking_id]
     );
     const preset = presetRes.rows[0];
 
@@ -128,7 +160,7 @@ exports.insertPreset = async ({ branch_id, name, category = null, active = true,
   }
 };
 
-exports.updatePreset = (id, { branch_id, name, category, active }) => {
+exports.updatePreset = (id, { branch_id, name, category, active, vin, mileage, technician, booking_id }) => {
   return db
     .query(
       `UPDATE invoice_presets
@@ -136,10 +168,14 @@ exports.updatePreset = (id, { branch_id, name, category, active }) => {
            name      = COALESCE($2, name),
            category  = COALESCE($3, category),
            active    = COALESCE($4, active),
+           vin         = COALESCE($5, vin),
+           mileage     = COALESCE($6, mileage),
+           technician  = COALESCE($7, technician),
+           booking_id  = COALESCE($8, booking_id),
            created_at = created_at
-       WHERE id = $5
+       WHERE id = $9
        RETURNING *;`,
-      [branch_id, name, category, active, id]
+      [branch_id, name, category, active, vin, mileage, technician, booking_id, id]
     )
     .then(res => {
       if (!res.rows.length) return Promise.reject({ status: 404, msg: 'Preset not found' });

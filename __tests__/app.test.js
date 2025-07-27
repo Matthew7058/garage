@@ -1079,6 +1079,150 @@ describe("Invoice Presets Endpoints", () => {
     });
   });
 // --------------------
+// Job Sheets Endpoints
+// --------------------
+describe("Job Sheets Endpoints", () => {
+  // 1. Get all job sheets
+  describe("GET /api/job-sheets", () => {
+    test("200: responds with an array of job sheets (each with items array)", () => {
+      return request(app)
+        .get("/api/job-sheets")
+        .expect(200)
+        .then(({ body: { job_sheets } }) => {
+          expect(Array.isArray(job_sheets)).toBe(true);
+          if (job_sheets.length) {
+            const j = job_sheets[0];
+            expect(j).toHaveProperty("id");
+            expect(j).toHaveProperty("branch_id");
+            expect(j).toHaveProperty("booking_id");
+            expect(j).toHaveProperty("vin");
+            expect(j).toHaveProperty("mileage");
+            expect(Array.isArray(j.items)).toBe(true);
+          }
+        });
+    });
+  });
+
+  // 2. Create a job sheet
+  describe("POST /api/job-sheets", () => {
+    test("201: creates a job sheet with its items", () => {
+      const payload = {
+        branch_id: 1,
+        booking_id: 1,
+        name: "Service Job Sheet",
+        category: "jobsheet",
+        vin: "WBA1234567890",
+        mileage: 123456,
+        technician: "Gaz",
+        items: [
+          { type: "labour", description: "Inspection", quantity_default: 1, price: 40, vat_applies: true }
+        ]
+      };
+      return request(app)
+        .post("/api/job-sheets")
+        .send(payload)
+        .expect(201)
+        .then(({ body: { job_sheet } }) => {
+          expect(job_sheet).toHaveProperty("id");
+          expect(job_sheet.name).toBe(payload.name);
+          expect(job_sheet.category).toBe("jobsheet");
+          expect(job_sheet.booking_id).toBe(payload.booking_id);
+          expect(Array.isArray(job_sheet.items)).toBe(true);
+          expect(job_sheet.items.length).toBe(1);
+        });
+    });
+  });
+
+  // 3. Get by id
+  describe("GET /api/job-sheets/:id", () => {
+    test("200: gets a job sheet by id", () => {
+      const make = { branch_id: 1, booking_id: 1, name: "Temp Sheet", category: "jobsheet", items: [] };
+      return request(app)
+        .post("/api/job-sheets")
+        .send(make)
+        .expect(201)
+        .then(({ body: { job_sheet } }) => {
+          return request(app)
+            .get(`/api/job-sheets/${job_sheet.id}`)
+            .expect(200)
+            .then(({ body: { job_sheet: fetched } }) => {
+              expect(fetched).toHaveProperty("id", job_sheet.id);
+            });
+        });
+    });
+
+    test("404: returns error if sheet not found", () => {
+      return request(app)
+        .get("/api/job-sheets/999999")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/Preset not found/i);
+        });
+    });
+  });
+
+  // 4. Get by booking id
+  describe("GET /api/job-sheets/booking/:booking_id", () => {
+    test("200: gets job sheet by booking id", () => {
+      const make = { branch_id: 1, booking_id: 2, name: "Booking Sheet", category: "jobsheet", items: [] };
+      return request(app)
+        .post("/api/job-sheets")
+        .send(make)
+        .expect(201)
+        .then(() => {
+          return request(app)
+            .get(`/api/job-sheets/booking/${make.booking_id}`)
+            .expect(200)
+            .then(({ body: { job_sheet } }) => {
+              expect(job_sheet).toHaveProperty("booking_id", make.booking_id);
+            });
+        });
+    });
+  });
+
+  // 5. Patch a job sheet
+  describe("PATCH /api/job-sheets/:id", () => {
+    test("200: updates a job sheet", () => {
+      const make = { branch_id: 1, booking_id: 3, name: "Update Sheet", category: "jobsheet", items: [] };
+      return request(app)
+        .post("/api/job-sheets")
+        .send(make)
+        .expect(201)
+        .then(({ body: { job_sheet } }) => {
+          const patchData = { name: "Updated Job Sheet", mileage: 150000 };
+          return request(app)
+            .patch(`/api/job-sheets/${job_sheet.id}`)
+            .send(patchData)
+            .expect(200)
+            .then(({ body: { job_sheet: updated } }) => {
+              expect(updated.name).toBe(patchData.name);
+              expect(updated.mileage).toBe(patchData.mileage);
+            });
+        });
+    });
+  });
+
+  // 6. Delete a job sheet
+  describe("DELETE /api/job-sheets/:id", () => {
+    test("200: deletes a job sheet", () => {
+      const make = { branch_id: 1, booking_id: 4, name: "Delete Sheet", category: "jobsheet", items: [] };
+      return request(app)
+        .post("/api/job-sheets")
+        .send(make)
+        .expect(201)
+        .then(({ body: { job_sheet } }) => {
+          return request(app)
+            .delete(`/api/job-sheets/${job_sheet.id}`)
+            .expect(200)
+            .then(({ body: { job_sheet: deleted } }) => {
+              expect(deleted).toHaveProperty("id", job_sheet.id);
+            });
+        });
+    });
+  });
+});
+
+// --------------------
 // Booking Types Endpoints
 // --------------------
 describe("Booking Types Endpoints", () => {
