@@ -129,11 +129,6 @@ app.post  ('/api/job-sheets',                     invoicePresetsController.postJ
 app.patch ('/api/job-sheets/:id',                 invoicePresetsController.patchJobSheet);
 app.delete('/api/job-sheets/:id',                 invoicePresetsController.deleteJobSheet);
 
-// Job‑Sheet Items (alias of preset‑item handlers)
-app.post  ('/api/job-sheets/:id/items',           invoicePresetsController.postInvoicePresetItem);
-app.patch ('/api/job-sheets/items/:item_id',      invoicePresetsController.patchInvoicePresetItem);
-app.delete('/api/job-sheets/items/:item_id',      invoicePresetsController.deleteInvoicePresetItem);
-
 // 404 error for any undefined route
 app.all('*', (req, res) => {
   res.status(404).send({ msg: 'Route not found' });
