@@ -17,6 +17,7 @@ function groupPresetRows(rows) {
         mileage:     r.mileage,
         technician:  r.technician,
         booking_id:  r.booking_id,
+        comments:   r.comments,
         created_at: r.created_at,
         items: []
       });
@@ -55,7 +56,7 @@ exports.fetchAllPresets = ({ branch_id, includeInactive = true } = {}) => {
 
   const sql = `
     SELECT
-      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.vin, p.mileage, p.technician, p.booking_id, p.created_at,
+      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.vin, p.mileage, p.technician, p.booking_id, p.comments, p.created_at,
       i.id AS item_id, i.type, i.description, i.quantity, i.price, i.vat_applies, i.quantity_default
     FROM invoice_presets p
     LEFT JOIN invoice_preset_items i ON i.preset_id = p.id
@@ -80,7 +81,7 @@ exports.fetchPresetsByBranch = (branch_id, { includeInactive = true } = {}) => {
 exports.fetchPresetById = (id) => {
   const sql = `
     SELECT
-      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.vin, p.mileage, p.technician, p.booking_id, p.created_at,
+      p.id AS preset_id, p.branch_id, p.name, p.category, p.active, p.vin, p.mileage, p.technician, p.booking_id, p.comments, p.created_at,
       i.id AS item_id, i.type, i.description, i.quantity, i.price, i.vat_applies, i.quantity_default
     FROM invoice_presets p
     LEFT JOIN invoice_preset_items i ON i.preset_id = p.id
@@ -103,7 +104,7 @@ exports.fetchJobSheetByBookingId = (booking_id) => {
   const sql = `
     SELECT
       p.id AS preset_id, p.branch_id, p.name, p.category, p.active,
-      p.vin, p.mileage, p.technician, p.booking_id, p.created_at,
+      p.vin, p.mileage, p.technician, p.booking_id, p.comments, p.created_at,
       i.id AS item_id, i.type, i.description, i.quantity, i.price,
       i.vat_applies, i.quantity_default
     FROM invoice_presets p
@@ -121,14 +122,14 @@ exports.fetchJobSheetByBookingId = (booking_id) => {
 
 exports.insertPreset = async ({ branch_id, name, category = null, active = true,
                                 vin = null, mileage = null, technician = null,
-                                booking_id = null, items = [] }) => {
+                                booking_id = null, comments = null, items = [] }) => {
   await db.query('BEGIN');
   try {
     const presetRes = await db.query(
-      `INSERT INTO invoice_presets (branch_id, name, category, active, vin, mileage, technician, booking_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO invoice_presets (branch_id, name, category, active, vin, mileage, technician, booking_id, comments)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *;`,
-      [branch_id, name, category, active, vin, mileage, technician, booking_id]
+      [branch_id, name, category, active, vin, mileage, technician, booking_id, comments]
     );
     const preset = presetRes.rows[0];
 
@@ -160,7 +161,7 @@ exports.insertPreset = async ({ branch_id, name, category = null, active = true,
   }
 };
 
-exports.updatePreset = (id, { branch_id, name, category, active, vin, mileage, technician, booking_id }) => {
+exports.updatePreset = (id, { branch_id, name, category, active, vin, mileage, technician, booking_id, comments }) => {
   return db
     .query(
       `UPDATE invoice_presets
@@ -172,10 +173,11 @@ exports.updatePreset = (id, { branch_id, name, category, active, vin, mileage, t
            mileage     = COALESCE($6, mileage),
            technician  = COALESCE($7, technician),
            booking_id  = COALESCE($8, booking_id),
+           comments    = COALESCE($9, comments),
            created_at = created_at
-       WHERE id = $9
+       WHERE id = $10
        RETURNING *;`,
-      [branch_id, name, category, active, vin, mileage, technician, booking_id, id]
+      [branch_id, name, category, active, vin, mileage, technician, booking_id, comments, id]
     )
     .then(res => {
       if (!res.rows.length) return Promise.reject({ status: 404, msg: 'Preset not found' });

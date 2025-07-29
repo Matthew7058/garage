@@ -146,6 +146,7 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             vin         TEXT,
             mileage     INTEGER,
             technician  TEXT,
+            comments    TEXT,
             active      BOOLEAN DEFAULT TRUE,
             created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -250,9 +251,9 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
       .then(() => {
         if (!presetsData || !presetsData.length) return Promise.resolve();
         const insertPresetsQuery = format(
-          `INSERT INTO invoice_presets (branch_id, name, category, active, vin, mileage, technician, booking_id) VALUES %L RETURNING *;`,
-          presetsData.map(({ branch_id, name, category = null, active = true, vin = null, mileage = null, technician = null, booking_id = null }) =>
-            [branch_id, name, category, active, vin, mileage, technician, booking_id]
+          `INSERT INTO invoice_presets (branch_id, name, category, active, vin, mileage, technician, booking_id, comments) VALUES %L RETURNING *;`,
+          presetsData.map(({ branch_id, name, category = null, active = true, vin = null, mileage = null, technician = null, booking_id = null, comments = null }) =>
+            [branch_id, name, category, active, vin, mileage, technician, booking_id, comments]
           )
         );
         return db.query(insertPresetsQuery);

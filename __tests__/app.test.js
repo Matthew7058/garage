@@ -1097,6 +1097,7 @@ describe("Job Sheets Endpoints", () => {
             expect(j).toHaveProperty("booking_id");
             expect(j).toHaveProperty("vin");
             expect(j).toHaveProperty("mileage");
+            expect(j).toHaveProperty("comments");
             expect(Array.isArray(j.items)).toBe(true);
           }
         });
@@ -1113,6 +1114,7 @@ describe("Job Sheets Endpoints", () => {
         category: "jobsheet",
         vin: "WBA1234567890",
         mileage: 123456,
+        comments: "Service is due soon",
         technician: "Gaz",
         items: [
           { type: "labour", description: "Inspection", quantity_default: 1, price: 40, vat_applies: true }
@@ -1129,6 +1131,7 @@ describe("Job Sheets Endpoints", () => {
           expect(job_sheet.booking_id).toBe(payload.booking_id);
           expect(Array.isArray(job_sheet.items)).toBe(true);
           expect(job_sheet.items.length).toBe(1);
+          expect(job_sheet.comments).toBe(payload.comments);
         });
     });
   });
@@ -1136,7 +1139,7 @@ describe("Job Sheets Endpoints", () => {
   // 3. Get by id
   describe("GET /api/job-sheets/:id", () => {
     test("200: gets a job sheet by id", () => {
-      const make = { branch_id: 1, booking_id: 1, name: "Temp Sheet", category: "jobsheet", items: [] };
+      const make = { branch_id: 1, booking_id: 1, name: "Temp Sheet", category: "jobsheet", comments: "Temp comment", items: [] };
       return request(app)
         .post("/api/job-sheets")
         .send(make)
@@ -1147,6 +1150,7 @@ describe("Job Sheets Endpoints", () => {
             .expect(200)
             .then(({ body: { job_sheet: fetched } }) => {
               expect(fetched).toHaveProperty("id", job_sheet.id);
+              expect(fetched.comments).toBe(make.comments);
             });
         });
     });
@@ -1164,7 +1168,7 @@ describe("Job Sheets Endpoints", () => {
   // 4. Get by booking id
   describe("GET /api/job-sheets/booking/:booking_id", () => {
     test("200: gets job sheet by booking id", () => {
-      const make = { branch_id: 1, booking_id: 2, name: "Booking Sheet", category: "jobsheet", items: [] };
+      const make = { branch_id: 1, booking_id: 2, name: "Booking Sheet", category: "jobsheet", comments: "Booking comment", items: [] };
       return request(app)
         .post("/api/job-sheets")
         .send(make)
@@ -1175,6 +1179,7 @@ describe("Job Sheets Endpoints", () => {
             .expect(200)
             .then(({ body: { job_sheet } }) => {
               expect(job_sheet).toHaveProperty("booking_id", make.booking_id);
+              expect(job_sheet.comments).toBe(make.comments);
             });
         });
     });
@@ -1183,13 +1188,13 @@ describe("Job Sheets Endpoints", () => {
   // 5. Patch a job sheet
   describe("PATCH /api/job-sheets/:id", () => {
     test("200: updates a job sheet", () => {
-      const make = { branch_id: 1, booking_id: 3, name: "Update Sheet", category: "jobsheet", items: [] };
+      const make = { branch_id: 1, booking_id: 3, name: "Update Sheet", category: "jobsheet", comments: "Initial comment", items: [] };
       return request(app)
         .post("/api/job-sheets")
         .send(make)
         .expect(201)
         .then(({ body: { job_sheet } }) => {
-          const patchData = { name: "Updated Job Sheet", mileage: 150000 };
+          const patchData = { name: "Updated Job Sheet", mileage: 150000, comments: "Updated comment" };
           return request(app)
             .patch(`/api/job-sheets/${job_sheet.id}`)
             .send(patchData)
@@ -1197,6 +1202,7 @@ describe("Job Sheets Endpoints", () => {
             .then(({ body: { job_sheet: updated } }) => {
               expect(updated.name).toBe(patchData.name);
               expect(updated.mileage).toBe(patchData.mileage);
+              expect(updated.comments).toBe(patchData.comments);
             });
         });
     });
