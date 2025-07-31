@@ -45,7 +45,10 @@ describe('POST /api/send-confirmation-email', () => {
     date: '2025-06-20',
     time: '14:00:00',
     service: 'Oil Change',
-    branchName: 'Central Garage'
+    branchName: 'Central Garage',
+    vehicle: 'Toyota Land Cruiser',
+    chain: 'Monopoly Garages',
+    name: 'John Doe'
   };
 
   test('400 if missing fields', async () => {

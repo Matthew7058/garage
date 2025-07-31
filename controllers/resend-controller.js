@@ -9,10 +9,10 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/send-confirmation-email', async (req, res) => {
-  const { email, bookingId, date, time, service, branchName } = req.body;
-  const mapSearch = `Bakestone Motors ${branchName}`;
+  const { email, bookingId, date, time, service, branchName, vehicle, chain, name } = req.body;
+  const mapSearch = `${chain} ${branchName}`;
 
-  if (!email || !bookingId || !date || !time || !service || !branchName) {
+  if (!email || !bookingId || !date || !time || !service || !branchName || !vehicle || !chain || !name) {
     return res.status(400).json({ message: 'Missing required fields in request body.' });
   }
 
@@ -22,9 +22,9 @@ router.post('/send-confirmation-email', async (req, res) => {
     const formattedTime = time.slice(0,5);
 
     const result = await resend.emails.send({
-      from: `Your Garage <no-reply@${process.env.EMAIL_DOMAIN}>`,
+      from: `${chain} ${branchName} <no-reply@${process.env.EMAIL_DOMAIN}>`,
       to: [email],
-      subject: 'Your Booking Confirmation',
+      subject: `${chain} Booking Confirmation`,
       html: `
 <head>
   <meta charset="UTF-8" />
@@ -40,7 +40,7 @@ router.post('/send-confirmation-email', async (req, res) => {
           <tr>
             <td align="center" style="padding:40px 20px 20px;">
               <span style="display:inline-block; font-size:48px; color:#0c2e6e; line-height:1;">✓</span>
-              <h1 style="margin: 20px 0 0; font-size:24px; color:#333333;">See you soon, ${email.split('@')[0]}!</h1>
+              <h1 style="margin: 20px 0 0; font-size:24px; color:#333333;">See you soon, ${name}!</h1>
               <p style="margin:8px 0 0; font-size:16px; color:#555555;">A confirmation email will be sent.</p>
             </td>
           </tr>
@@ -74,11 +74,11 @@ router.post('/send-confirmation-email', async (req, res) => {
                       </tr>
                       <tr>
                         <td style="font-weight:bold; border-bottom:1px solid #eeeeee;">Name</td>
-                        <td style="text-align:right; border-bottom:1px solid #eeeeee;">${email.split('@')[0]}</td>
+                        <td style="text-align:right; border-bottom:1px solid #eeeeee;">${name}</td>
                       </tr>
                       <tr>
                         <td style="font-weight:bold;">Vehicle</td>
-                        <td style="text-align:right;">${ 'N/A'}</td>
+                        <td style="text-align:right;">${vehicle}</td>
                       </tr>
                     </table>
                   </td>
@@ -111,12 +111,6 @@ router.post('/send-confirmation-email', async (req, res) => {
     </tr>
   </table>
 </body>
-        <p>Hi there,</p>
-        <p>Thanks for booking your <strong>${service}</strong> at <strong>${branchName}</strong>!</p>
-        <p><strong>Date:</strong> ${formattedDate}<br />
-           <strong>Time:</strong> ${formattedTime}</p>
-        <p>Your booking reference is <strong>${bookingId}</strong>.</p>
-        <p>We look forward to seeing you.</p>
       `
     });
     const messageId = result.data?.id;

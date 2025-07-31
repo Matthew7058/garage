@@ -160,7 +160,7 @@ const seed = ({ chainsData, usersData, bookingsData, bookingTypesData, hoursData
             preset_id        INTEGER REFERENCES invoice_presets(id) ON DELETE CASCADE,
             type             TEXT,
             description      TEXT,
-            quantity         INTEGER,
+            quantity         NUMERIC(6,2),
             price            NUMERIC(10,2) NOT NULL DEFAULT 0,
             vat_applies      BOOLEAN DEFAULT TRUE,
             quantity_default NUMERIC(6,2) NOT NULL DEFAULT 1

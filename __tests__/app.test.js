@@ -1015,6 +1015,38 @@ describe("Invoice Presets Endpoints", () => {
           expect(msg).toMatch(/item not found/i);
         });
     });
+
+    test("200: edits multiple numeric and boolean fields", () => {
+      const base = { branch_id: 1, name: "Coolant Flush", items: [] };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(base)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          const itemPayload = {
+            type: "labour",
+            description: "Coolant Flush Labour",
+            quantity_default: 1,
+            price: 80,
+            vat_applies: true
+          };
+          return request(app)
+            .post(`/api/invoice-presets/${preset.id}/items`)
+            .send(itemPayload)
+            .expect(201)
+            .then(({ body: { item } }) => {
+              const patch = { quantity_default: '2.00', vat_applies: false };
+              return request(app)
+                .patch(`/api/invoice-presets/items/${item.id}`)
+                .send(patch)
+                .expect(200)
+                .then(({ body: { item: updated } }) => {
+                  expect(updated.quantity_default).toBe(patch.quantity_default);
+                  expect(updated.vat_applies).toBe(patch.vat_applies);
+                });
+            });
+        });
+    });
   });
 
   describe("DELETE /api/invoice-presets/items/:itemId", () => {
@@ -1047,6 +1079,40 @@ describe("Invoice Presets Endpoints", () => {
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toMatch(/item not found/i);
+        });
+    });
+
+    test("404: deleting the same item twice returns error", () => {
+      const base = { branch_id: 1, name: "Oil Top-Up", items: [] };
+      return request(app)
+        .post("/api/invoice-presets")
+        .send(base)
+        .expect(201)
+        .then(({ body: { preset } }) => {
+          const itemPayload = {
+            type: "part",
+            description: "Oil Litre",
+            quantity_default: 1,
+            price: 5,
+            vat_applies: true
+          };
+          return request(app)
+            .post(`/api/invoice-presets/${preset.id}/items`)
+            .send(itemPayload)
+            .expect(201)
+            .then(({ body: { item } }) => {
+              return request(app)
+                .delete(`/api/invoice-presets/items/${item.id}`)
+                .expect(200)
+                .then(() => {
+                  return request(app)
+                    .delete(`/api/invoice-presets/items/${item.id}`)
+                    .expect(404)
+                    .then(({ body: { msg } }) => {
+                      expect(msg).toMatch(/item not found/i);
+                    });
+                });
+            });
         });
     });
   });
