@@ -90,3 +90,69 @@ describe('POST /api/send-confirmation-email', () => {
     expect(res.body).toHaveProperty('message', 'Server error sending confirmation email.');
   });
 });
+/* ──────────────────────────────────────────────────────────────
+   Tests for POST /api/send-invoice
+   ──────────────────────────────────────────────────────────── */
+describe('POST /api/send-invoice', () => {
+  const endpoint = '/api/send-invoice';
+  const samplePdf = Buffer.from('%PDF-1.4\n%âãÏÓ\n1 0 obj\n<<>>\nendobj\nxref\n0 2\n0000000000 65535 f \n0000000009 00000 n \ntrailer\n<<>>\nstartxref\n29\n%%EOF').toString('base64');
+
+  const validBody = {
+    email: 'test@example.com',
+    pdfBase64: samplePdf,
+    subject: 'Your Invoice',
+    bookingId: '98765',
+    chain: 'Monopoly Garages'
+  };
+
+  test('400 if missing required fields', async () => {
+    const res = await request(app).post(endpoint).send({ email: 'only@email' });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty(
+      'message',
+      'Missing required fields: email and pdfBase64'
+    );
+  });
+
+  test('200 on success', async () => {
+    // Mock Resend to resolve successfully
+    sendMock.mockResolvedValue({ data: { id: 'msg_inv_456' } });
+
+    const res = await request(app)
+      .post(endpoint)
+      .send(validBody);
+
+    // Ensure Resend was called with PDF attachment
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: [validBody.email],
+        attachments: expect.arrayContaining([
+          expect.objectContaining({
+            filename: expect.stringMatching(/invoice-98765\.pdf/),
+            type: 'application/pdf',
+            content: validBody.pdfBase64
+          })
+        ])
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('message', 'Invoice email sent');
+    expect(res.body).toHaveProperty('messageId', 'msg_inv_456');
+  });
+
+  test('500 on error', async () => {
+    // Force Resend to throw
+    sendMock.mockRejectedValue(new Error('send failed'));
+
+    const res = await request(app)
+      .post(endpoint)
+      .send(validBody);
+
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty(
+      'message',
+      'Server error sending invoice email.'
+    );
+  });
+});
