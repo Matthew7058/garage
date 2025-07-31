@@ -165,9 +165,28 @@ router.post('/send-invoice', async (req, res) => {
       to: [email],
       subject: subject || 'Your Invoice',
       html: `
-        <p>Dear Customer,</p>
-        <p>Please find your invoice attached. Thank you for choosing ${business}.</p>
-        <p style="font-size:12px; color:#777;">This is an automated email, please do not reply.</p>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Booking Confirmation</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; margin:0; padding:0; background-color:#f4f4f4;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin:0; padding:40px 0; background-color:#f4f4f4;">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+                <!-- Header -->
+                <tr>
+                  <td align="center" style="padding:40px 20px 20px;">
+                    <h1 style="margin: 20px 0 0; font-size:24px; color:#333333;">Thank you for choosing Bakestone Motors</h1>
+                    <p style="margin:8px 0 0; font-size:16px; color:#555555;">Please find your invoice attached.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
       `,
       attachments: [attachment]
     });
