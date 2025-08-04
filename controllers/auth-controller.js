@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const {
   fetchUsersByEmail,
   fetchUserByEmail,
@@ -37,9 +38,14 @@ exports.signUp = (req, res, next) => {
       });
     })
     .then((newUser) => {
-      // strip out the hash before returning
+      // strip out the hash and sign JWT before returning
       const { password_hash, ...safeUser } = newUser;
-      res.status(201).send({ user: safeUser });
+      const token = jwt.sign(
+        { id: safeUser.id, email: safeUser.email, role: safeUser.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' }
+      );
+      res.status(201).send({ user: safeUser, token });
     })
     .catch(next);
 };
@@ -58,7 +64,12 @@ exports.logIn = (req, res, next) => {
     .then((isValid) => {
       if (!isValid) return Promise.reject({ status: 401, msg: 'Invalid credentials' });
       const { password_hash, ...safeUser } = loadedUser;
-      res.status(200).send({ user: safeUser });
+      const token = jwt.sign(
+        { id: safeUser.id, email: safeUser.email, role: safeUser.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' }
+      );
+      res.status(200).send({ user: safeUser, token });
     })
     .catch(next);
 };

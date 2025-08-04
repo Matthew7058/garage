@@ -37,19 +37,11 @@ const confirmationEmailRouter = require('./controllers/resend-controller');
 app.get('/api', endpointsController.getEndpoints);
 
 // Garage Chains endpoints
-app.get('/api/garage-chains', garageChainsController.getGarageChains);
 app.get('/api/garage-chains/:id', garageChainsController.getGarageChainById);
-app.post('/api/garage-chains', garageChainsController.postGarageChain);
-app.patch('/api/garage-chains/:id', garageChainsController.patchGarageChain);
-app.delete('/api/garage-chains/:id', garageChainsController.deleteGarageChain);
 app.get('/api/garage-chains/:chain_id/branches', branchesController.getBranchesByChain);
 
 // Branches endpoints
-app.get('/api/branches', branchesController.getBranches);
 app.get('/api/branches/:id', branchesController.getBranchById);
-app.post('/api/branches', branchesController.postBranch);
-app.patch('/api/branches/:id', branchesController.patchBranch);
-app.delete('/api/branches/:id', branchesController.deleteBranch);
 
 // Users endpoints
 app.get('/api/users', usersController.getUsers);
@@ -69,13 +61,8 @@ app.get('/api/mot-history/:vrn', getMotHistory);
 app.use('/api', confirmationEmailRouter);
 
 // Operating Hours endpoints
-app.get('/api/operating-hours', operatingHoursController.getOperatingHours);
 app.get('/api/operating-hours/branch/:branch_id', operatingHoursController.getOperatingHoursByBranch);
 app.get('/api/operating-hours/:id', operatingHoursController.getOperatingHourById);
-app.post('/api/operating-hours', operatingHoursController.postOperatingHour);
-app.patch('/api/operating-hours/:id', operatingHoursController.patchOperatingHour);
-
-app.delete('/api/operating-hours/:id', operatingHoursController.deleteOperatingHour);
 
 // Operating Hours Override endpoints
 app.get('/api/operating-hours-override', operatingHoursOverrideController.getAllOverrides);
@@ -89,7 +76,6 @@ app.get(
 );
 
 // Booking Types endpoints
-app.get('/api/booking-types', bookingTypesController.getBookingTypes);
 app.get('/api/booking-types/branch/:branch_id', bookingTypesController.getBookingTypesByBranch);
 app.get('/api/booking-types/:id', bookingTypesController.getBookingTypeById);
 app.post('/api/booking-types', bookingTypesController.postBookingType);
@@ -97,7 +83,6 @@ app.patch('/api/booking-types/:id', bookingTypesController.patchBookingType);
 app.delete('/api/booking-types/:id', bookingTypesController.deleteBookingType);
 
 // Bookings endpoints
-app.get('/api/bookings', bookingsController.getBookings);
 app.get('/api/bookings/branch/:branch_id/date/:date', bookingsController.getBookingsByBranchAndDate);
 app.get('/api/bookings/branch/:branch_id', bookingsController.getBookingsByBranch);
 app.get('/api/bookings/:id', bookingsController.getBookingById);
@@ -117,8 +102,6 @@ app.patch('/api/booking-blocks/:id', bookingBlocksController.patchBlock);
 app.delete('/api/booking-blocks/:id', bookingBlocksController.deleteBlock);
 
 // Invoice Presets endpoints
-// Presets
-app.get('/api/invoice-presets',                 invoicePresetsController.getInvoicePresets);
 // By Branch
 app.get('/api/invoice-presets/branch/:branch_id', invoicePresetsController.getInvoicePresetsByBranch);
 app.get('/api/invoice-presets/:id',                 invoicePresetsController.getInvoicePresetById);
@@ -133,7 +116,6 @@ app.delete('/api/invoice-presets/items/:item_id',invoicePresetsController.delete
 
 
 // Job Sheets endpoints  ── same controller, category forced to "jobsheet"
-app.get   ('/api/job-sheets',                     invoicePresetsController.getJobSheets);
 app.get   ('/api/job-sheets/booking/:booking_id', invoicePresetsController.getJobSheetByBookingId);
 app.get   ('/api/job-sheets/:id',                 invoicePresetsController.getJobSheetById);
 app.post  ('/api/job-sheets',                     invoicePresetsController.postJobSheet);
