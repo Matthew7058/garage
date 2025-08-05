@@ -52,7 +52,7 @@ app.get('/api/branches/:id', branchesController.getBranchById);
 
 // Users endpoints
 app.get('/api/users', authenticate, authorize(['admin', 'adminp', 'admins']), usersController.getUsers);
-app.get('/api/users/:id', usersController.getUserById);
+app.get('/api/users/:id', authenticate, authorize(['admin', 'adminp', 'admins']), usersController.getUserById);
 app.post('/api/users', usersController.postUser);
 app.post('/api/users/check-or-create', usersController.checkOrCreateUser);
 app.patch('/api/users/:id', usersController.patchUser);
@@ -92,7 +92,7 @@ app.delete('/api/booking-types/:id', bookingTypesController.deleteBookingType);
 
 // Bookings endpoints
 app.get('/api/bookings/branch/:branch_id/date/:date', bookingsController.getBookingsByBranchAndDate);
-app.get('/api/bookings/branch/:branch_id', bookingsController.getBookingsByBranch);
+app.get('/api/bookings/branch/:branch_id', authenticate, authorize(['admin', 'adminp', 'admins']), bookingsController.getBookingsByBranch);
 app.get('/api/bookings/:id', bookingsController.getBookingById);
 app.post('/api/bookings', bookingsController.postBooking);
 app.patch('/api/bookings/:id', bookingsController.patchBooking);

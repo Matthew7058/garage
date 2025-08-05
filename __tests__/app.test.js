@@ -1,8 +1,8 @@
 const endpointsJson = require("../endpoints.json");
-const jwt = require('jsonwebtoken');
 /* Set up your test imports here */
 
 const app = require('../app');
+const jwt = require('jsonwebtoken');
 const request = require('supertest');
 const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
@@ -12,6 +12,12 @@ const { chainsData, usersData, bookingsData, bookingTypesData, hoursData, overri
 
 beforeEach(() => seed({ chainsData, usersData, bookingsData, bookingTypesData, hoursData, overridesData, branchesData, blocksData, presetsData, presetItemsData }));
 afterAll(() => db.end());
+
+const adminToken = jwt.sign(
+  { id: usersData[0].id, email: usersData[0].email, role: 'admin' },
+  process.env.JWT_SECRET || 'test_secret',
+  { expiresIn: '1h' }
+);
 
 describe("GET /api", () => {
   test("200: Responds with an object detailing the documentation for each endpoint", () => {
@@ -141,28 +147,28 @@ describe("Users Endpoints", () => {
   });
 
   describe("GET /api/users/:id", () => {
-    test("200: Responds with a single user", () => {
+    test("401: unauthorised when no token", () => {
       return request(app)
         .get("/api/users/1")
+        .expect(401);
+    });
+
+    test("200: returns a single user with valid ADMIN token", () => {
+      return request(app)
+        .get("/api/users/1")
+        .set("Authorization", `Bearer ${adminToken}`)
         .expect(200)
         .then(({ body: { user } }) => {
           expect(user).toHaveProperty("id", 1);
-        });
-    });
-
-    test("200: responds with address & postcode fields", () => {
-      return request(app)
-        .get("/api/users/1")
-        .expect(200)
-        .then(({ body: { user } }) => {
           expect(user).toHaveProperty("address");
           expect(user).toHaveProperty("postcode");
         });
     });
 
-    test("404: Responds with error if user not found", () => {
+    test("404: user not found still needs token", () => {
       return request(app)
         .get("/api/users/9999")
+        .set("Authorization", `Bearer ${adminToken}`)
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("User not found");
@@ -1287,9 +1293,16 @@ describe("Bookings Endpoints", () => {
 
   // 3. All bookings at a branch
   describe("GET /api/bookings/branch/:branch_id", () => {
-    test("200: returns all bookings for branch 1", () => {
+    test("401: unauthorised when no token", () => {
       return request(app)
         .get("/api/bookings/branch/1")
+        .expect(401);
+    });
+
+    test("200: returns bookings for branch 1 with ADMIN token", () => {
+      return request(app)
+        .get("/api/bookings/branch/1")
+        .set("Authorization", `Bearer ${adminToken}`)
         .expect(200)
         .then(({ body: { bookings } }) => {
           expect(Array.isArray(bookings)).toBe(true);
@@ -1302,9 +1315,10 @@ describe("Bookings Endpoints", () => {
         });
     });
 
-    test("200: empty array for branch with no bookings (e.g. 999)", () => {
+    test("200: empty array for unknown branch with token", () => {
       return request(app)
         .get("/api/bookings/branch/999")
+        .set("Authorization", `Bearer ${adminToken}`)
         .expect(200)
         .then(({ body: { bookings } }) => {
           expect(Array.isArray(bookings)).toBe(true);
