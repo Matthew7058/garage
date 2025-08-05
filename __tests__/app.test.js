@@ -1,5 +1,5 @@
 const endpointsJson = require("../endpoints.json");
-
+const jwt = require('jsonwebtoken');
 /* Set up your test imports here */
 
 const app = require('../app');
@@ -103,10 +103,35 @@ describe("Branches Endpoints", () => {
 // Users Endpoints
 // --------------------
 describe("Users Endpoints", () => {
+  // --------------------
+  // GET /api/users  (auth protected)
+  // --------------------
   describe("GET /api/users", () => {
-    test("200: Responds with all users", () => {
+    test("401: responds with unauthorised when no token provided", () => {
       return request(app)
         .get("/api/users")
+        .expect(401)
+        .then(({ body: { msg } }) => {
+          expect(msg).toMatch(/invalid token/i);
+        });
+    });
+
+    test("200: responds with all users when a valid ADMIN token is provided", () => {
+      // Manually sign an ADMIN JWT so we don't depend on signup role assignment
+      const adminPayload = {
+        id: usersData[0].id,
+        email: usersData[0].email,
+        role: 'admin'
+      };
+      const adminToken = jwt.sign(
+        adminPayload,
+        process.env.JWT_SECRET || 'test_secret',
+        { expiresIn: '1h' }
+      );
+
+      return request(app)
+        .get("/api/users")
+        .set("Authorization", `Bearer ${adminToken}`)
         .expect(200)
         .then(({ body: { users } }) => {
           expect(Array.isArray(users)).toBe(true);

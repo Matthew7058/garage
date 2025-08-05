@@ -5,6 +5,8 @@ const app = express();
 const cors = require('cors');
 const allowedOrigins = ['http://localhost:5173', 'https://www.digit101.com'];
 
+const authenticate = require('./db/middleware/authenticate');
+const authorize = require('./db/middleware/authorize');
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -49,7 +51,7 @@ app.get('/api/garage-chains/:chain_id/branches', branchesController.getBranchesB
 app.get('/api/branches/:id', branchesController.getBranchById);
 
 // Users endpoints
-app.get('/api/users', usersController.getUsers);
+app.get('/api/users', authenticate, authorize(['admin', 'adminp', 'admins']), usersController.getUsers);
 app.get('/api/users/:id', usersController.getUserById);
 app.post('/api/users', usersController.postUser);
 app.post('/api/users/check-or-create', usersController.checkOrCreateUser);
@@ -85,7 +87,7 @@ app.get(
 app.get('/api/booking-types/branch/:branch_id', bookingTypesController.getBookingTypesByBranch);
 app.get('/api/booking-types/:id', bookingTypesController.getBookingTypeById);
 app.post('/api/booking-types', bookingTypesController.postBookingType);
-app.patch('/api/booking-types/:id', bookingTypesController.patchBookingType);
+app.patch('/api/booking-types/:id',bookingTypesController.patchBookingType);
 app.delete('/api/booking-types/:id', bookingTypesController.deleteBookingType);
 
 // Bookings endpoints
