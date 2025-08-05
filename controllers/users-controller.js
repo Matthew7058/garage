@@ -60,13 +60,14 @@ const {
 
     fetchAllUsers()
       .then((users) => {
-        const existing = (users || []).find(
-          (u) =>
-            u.garage_id === garage_id &&
-            u.first_name === first_name &&
-            u.last_name === last_name &&
-            u.email === email &&
-            u.phone === phone
+        const normalize = (str = '') => str.toString().trim().toLowerCase();
+
+        const existing = (users || []).find((u) =>
+          u.garage_id === garage_id &&
+          normalize(u.first_name) === normalize(first_name) &&
+          normalize(u.last_name)  === normalize(last_name) &&
+          normalize(u.email)      === normalize(email) &&
+          normalize(u.phone)      === normalize(phone)
         );
 
         if (existing) {
