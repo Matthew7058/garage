@@ -5,6 +5,7 @@ const app = express();
 const cors = require('cors');
 const allowedOrigins = ['http://localhost:5173', 'https://www.digit101.com'];
 
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -16,6 +17,10 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// Import middleware
+//const authenticate = require('./middleware/authenticate');
+//const authorize = require('./middleware/authorize');
 
 // Import controllers
 
@@ -47,6 +52,7 @@ app.get('/api/branches/:id', branchesController.getBranchById);
 app.get('/api/users', usersController.getUsers);
 app.get('/api/users/:id', usersController.getUserById);
 app.post('/api/users', usersController.postUser);
+app.post('/api/users/check-or-create', usersController.checkOrCreateUser);
 app.patch('/api/users/:id', usersController.patchUser);
 app.delete('/api/users/:id', usersController.deleteUser);
 

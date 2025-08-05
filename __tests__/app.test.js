@@ -170,6 +170,55 @@ describe("Users Endpoints", () => {
         });
     });
   });
+  describe("POST /api/users/check-or-create", () => {
+    test("200: returns an existing user when a match is found", () => {
+      const existing = usersData[0]; // seeded user
+      const payload = {
+        garage_id: existing.garage_id,
+        first_name: existing.first_name,
+        last_name: existing.last_name,
+        email: existing.email,
+        phone: existing.phone,
+        address: existing.address,
+        postcode: existing.postcode
+      };
+
+      return request(app)
+        .post("/api/users/check-or-create")
+        .send(payload)
+        .expect(200)
+        .then(({ body: { user } }) => {
+          expect(user).toHaveProperty("id");
+          expect(user.email).toBe(existing.email);
+          expect(user.first_name).toBe(existing.first_name);
+          expect(user.garage_id).toBe(existing.garage_id);
+        });
+    });
+
+    test("201: creates and returns a new user when no match is found", () => {
+      const uniqueEmail = `brandnew${Date.now()}@example.com`;
+      const payload = {
+        garage_id: 1,
+        first_name: "Brand",
+        last_name: "New",
+        email: uniqueEmail,
+        phone: "07700900000",
+        address: "1 Test Street",
+        postcode: "AA1 1AA"
+      };
+
+      return request(app)
+        .post("/api/users/check-or-create")
+        .send(payload)
+        .expect(201)
+        .then(({ body: { user } }) => {
+          expect(user).toHaveProperty("id");
+          expect(user.email).toBe(uniqueEmail);
+          expect(user.first_name).toBe(payload.first_name);
+          expect(user.garage_id).toBe(payload.garage_id);
+        });
+    });
+  });
 
   describe("PATCH /api/users/:id", () => {
     test("200: Updates a user", () => {
