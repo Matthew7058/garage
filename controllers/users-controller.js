@@ -74,7 +74,8 @@ const {
         }
 
         // Default role for customer‑created records
-        const role = 'customer';
+        const role = 'temporary';
+        const password_hash = ""; // No password for temporary users
 
         return insertUser({
           garage_id,
@@ -82,6 +83,7 @@ const {
           last_name,
           email,
           phone,
+          password_hash,
           role,
           address,
           postcode
